@@ -24,6 +24,7 @@ type ProductService interface {
 	GetProductPublicByID(id uint64) (*models.Product, error)
 	GetAllProductsPublic() ([]*models.Product, error)
 	CreateReviewPublic(dto *dtos.ReviewCreateDTO) (*models.Review, error)
+	SearchProductsPublic(query string) ([]*models.Product, error)
 }
 
 // productService adalah implementasi dari ProductService.
@@ -164,4 +165,14 @@ func (s *productService) CreateReviewPublic(dto *dtos.ReviewCreateDTO) (*models.
 		return nil, err
 	}
 	return review, nil
+}
+
+// SearchProductsPublic mengimplementasikan logika bisnis untuk pencarian produk.
+func (s *productService) SearchProductsPublic(query string) ([]*models.Product, error) {
+	// Panggil repository untuk mencari produk.
+	products, err := s.productRepository.SearchProducts(query)
+	if err != nil {
+		return nil, err
+	}
+	return products, nil
 }

@@ -24,6 +24,10 @@ type ProductRepository interface {
 	// Metode untuk user biasa
 	GetProductPublicByID(id uint64) (*models.Product, error)
 	GetAllProductsPublic() ([]*models.Product, error)
+
+	// Metode baru untuk pencarian produk.
+	// SearchProducts mencari produk berdasarkan nama atau deskripsi.
+	SearchProducts(query string) ([]*models.Product, error)
 }
 
 // productRepository adalah implementasi dari ProductRepository.
@@ -33,56 +37,55 @@ type productRepository struct {
 
 // NewProductRepository membuat dan mengembalikan instance baru dari ProductRepository.
 func NewProductRepository(db *gorm.DB) ProductRepository {
-	return &productRepository{BaseRepository{DB: db}}
+	return &productRepository{BaseRepository: BaseRepository{DB: db}}
 }
 
-// CreateProduct membuat record produk baru di database.
+// CreateProduct membuat produk baru di database.
 func (r *productRepository) CreateProduct(product *models.Product) error {
 	return r.DB.Create(product).Error
 }
 
-// UpdateProduct memperbarui record produk yang sudah ada di database.
+// UpdateProduct memperbarui produk yang sudah ada.
 func (r *productRepository) UpdateProduct(product *models.Product) error {
 	return r.DB.Save(product).Error
 }
 
-// DeleteProduct menghapus record produk dari database berdasarkan ID.
+// DeleteProduct menghapus produk dari database.
 func (r *productRepository) DeleteProduct(id uint64) error {
 	return r.DB.Delete(&models.Product{}, id).Error
 }
 
-// GetProductByID mengambil record produk oleh ID-nya untuk admin.
+// GetProductByID mengambil produk berdasarkan ID-nya.
 func (r *productRepository) GetProductByID(id uint64) (*models.Product, error) {
 	var product models.Product
-	if err := r.DB.First(&product, id).Error; err != nil {
+	if err := r.DB.Preload("ProductItems").First(&product, id).Error; err != nil {
 		return nil, err
 	}
 	return &product, nil
 }
 
-// GetAllProducts mengambil semua record produk untuk admin.
+// GetAllProducts mengambil semua produk dari database.
 func (r *productRepository) GetAllProducts() ([]*models.Product, error) {
 	var products []*models.Product
-	if err := r.DB.Find(&products).Error; err != nil {
+	if err := r.DB.Preload("ProductItems").Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil
 }
 
-// GetProductPublicByID mengambil record produk oleh ID-nya untuk user biasa.
-// Ini bisa dioptimalkan untuk hanya mengambil data publik.
+// GetProductPublicByID mengambil produk berdasarkan ID-nya untuk user biasa.
 func (r *productRepository) GetProductPublicByID(id uint64) (*models.Product, error) {
 	var product models.Product
-	if err := r.DB.First(&product, id).Error; err != nil {
+	if err := r.DB.Preload("ProductItems").First(&product, id).Error; err != nil {
 		return nil, err
 	}
 	return &product, nil
 }
 
-// GetAllProductsPublic mengambil semua record produk untuk user biasa.
+// GetAllProductsPublic mengambil semua produk untuk user biasa.
 func (r *productRepository) GetAllProductsPublic() ([]*models.Product, error) {
 	var products []*models.Product
-	if err := r.DB.Find(&products).Error; err != nil {
+	if err := r.DB.Preload("ProductItems").Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil
@@ -121,11 +124,23 @@ func (r *productRepository) GetReviewByID(reviewID uint64) (*models.Review, erro
 	return &review, nil
 }
 
-// GetProductItemByID retrieves a single product item by its ID.
+// GetProductItemByID mengambil item produk berdasarkan ID-nya.
 func (r *productRepository) GetProductItemByID(id uint64) (*models.ProductItem, error) {
 	var item models.ProductItem
 	if err := r.DB.Preload("Product").First(&item, id).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
+}
+
+// SearchProducts mengimplementasikan pencarian produk berdasarkan nama atau deskripsi.
+func (r *productRepository) SearchProducts(query string) ([]*models.Product, error) {
+	var products []*models.Product
+	searchTerm := "%" + query + "%"
+	// Menggunakan `Where` dengan `OR` untuk mencari kecocokan pada nama atau deskripsi.
+	// `Preload` digunakan untuk memuat data terkait (product items).
+	if err := r.DB.Where("name ILIKE ? OR description ILIKE ?", searchTerm, searchTerm).Preload("ProductItems").Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
 }

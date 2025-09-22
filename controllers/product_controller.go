@@ -25,6 +25,7 @@ type ProductController interface {
 	GetAllProductsPublic(c *fiber.Ctx) error
 	GetReviewsByProductIDPublic(c *fiber.Ctx) error // Endpoint baru
 	CreateReview(c *fiber.Ctx) error                // Endpoint baru
+	SearchProductsPublic(c *fiber.Ctx) error
 }
 
 // productController is the implementation of ProductController.
@@ -205,4 +206,22 @@ func (ctrl *productController) CreateReview(c *fiber.Ctx) error {
 
 	response := dtos.ToReviewResponseDTO(review)
 	return utils.SendResponse(c, http.StatusCreated, "Review created successfully", response)
+}
+
+// SearchProductsPublic handles product searches for public users.
+func (ctrl *productController) SearchProductsPublic(c *fiber.Ctx) error {
+	// Mengambil parameter kueri 'q' dari URL.
+	query := c.Query("q")
+	if query == "" {
+		return utils.SendResponse(c, http.StatusBadRequest, "Search query 'q' is required", nil)
+	}
+
+	// Memanggil service untuk melakukan pencarian.
+	products, err := ctrl.productService.SearchProductsPublic(query)
+	if err != nil {
+		return utils.SendResponse(c, http.StatusInternalServerError, "Failed to search products", nil)
+	}
+
+	response := dtos.ToProductResponseDTOs(products)
+	return utils.SendResponse(c, http.StatusOK, "Products found", response)
 }

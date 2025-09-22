@@ -43,26 +43,29 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	api := app.Group("/api/v1")
 
 	// ---
-	// Setup public routes for the User resource (Auth).
+	// Setup public routes for the User resource.
 	userRoutes := api.Group("/users")
-	userRoutes.Post("/register", userController.Register)
-	userRoutes.Post("/login", userController.Login)
+	userRoutes.Post("/register", userController.RegisterUser)
+	userRoutes.Post("/login", userController.LoginUser)
+	userRoutes.Post("/forgot-password", userController.ForgotPassword)
+	userRoutes.Post("/verify-otp", userController.VerifyOTP)
+	userRoutes.Post("/reset-password", userController.ResetPassword)
+	userRoutes.Post("/refresh-token", userController.RefreshToken)
 
-	// --
-	// Setup authenticated routes for the User resource.
-	userAuthRoutes := api.Group("/users")
-	userAuthRoutes.Use(middlewares.AuthMiddleware())
-	userAuthRoutes.Get("/profile", userController.GetUserProfile)
-	userAuthRoutes.Put("/profile", userController.UpdateUserProfile)
-	userAuthRoutes.Delete("/profile", userController.DeleteUser)
-	userAuthRoutes.Post("/logout", userController.Logout)
+	// Setup private routes for the User resource.
+	privateRoutes := api.Group("/users")
+	privateRoutes.Use(middlewares.AuthMiddleware())
+	privateRoutes.Post("/logout", userController.LogoutUser)
+	privateRoutes.Get("/me", userController.GetUserByAccessToken)
+	privateRoutes.Patch("/edit-profile", userController.EditProfile)
 
-	// --
+	// ---
 	// Setup admin routes for the User resource.
 	userAdminRoutes := api.Group("/admin/users")
 	userAdminRoutes.Use(middlewares.AuthMiddleware(), middlewares.AdminMiddleware())
-	userAdminRoutes.Get("/:id", userController.AdminGetUserByID)
+	userAdminRoutes.Post("/", userController.AdminCreateUser)
 	userAdminRoutes.Get("/", userController.AdminGetAllUsers)
+	userAdminRoutes.Get("/:id", userController.AdminGetUserByID)
 	userAdminRoutes.Put("/:id", userController.AdminUpdateUser)
 	userAdminRoutes.Delete("/:id", userController.AdminDeleteUser)
 
@@ -71,6 +74,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	productRoutes := api.Group("/products")
 	productRoutes.Get("/", productController.GetAllProductsPublic)
 	productRoutes.Get("/:id", productController.GetProductPublicByID)
+	productRoutes.Get("/search", productController.SearchProductsPublic)
 
 	// ---
 	// Setup public routes for the Product reviews.
