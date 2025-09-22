@@ -25,6 +25,7 @@ type ProductService interface {
 	GetAllProductsPublic() ([]*models.Product, error)
 	CreateReviewPublic(dto *dtos.ReviewCreateDTO) (*models.Review, error)
 	SearchProductsPublic(query string) ([]*models.Product, error)
+	GetAllProductsPublicWithFilter(filter *dtos.ProductFilterRequestDTO) ([]*models.Product, error)
 }
 
 // productService adalah implementasi dari ProductService.
@@ -175,4 +176,9 @@ func (s *productService) SearchProductsPublic(query string) ([]*models.Product, 
 		return nil, err
 	}
 	return products, nil
+}
+
+// GetAllProductsPublicWithFilter mengimplementasikan logika bisnis untuk mendapatkan semua produk publik dengan filter.
+func (s *productService) GetAllProductsPublicWithFilter(filter *dtos.ProductFilterRequestDTO) ([]*models.Product, error) {
+	return s.productRepository.GetAllProductsPublicWithFilter(filter)
 }

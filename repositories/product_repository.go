@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"flicknfit_backend/dtos"
 	"flicknfit_backend/models"
 
 	"gorm.io/gorm"
@@ -28,6 +29,8 @@ type ProductRepository interface {
 	// Metode baru untuk pencarian produk.
 	// SearchProducts mencari produk berdasarkan nama atau deskripsi.
 	SearchProducts(query string) ([]*models.Product, error)
+
+	GetAllProductsPublicWithFilter(filter *dtos.ProductFilterRequestDTO) ([]*models.Product, error)
 }
 
 // productRepository adalah implementasi dari ProductRepository.
@@ -55,37 +58,47 @@ func (r *productRepository) DeleteProduct(id uint64) error {
 	return r.DB.Delete(&models.Product{}, id).Error
 }
 
-// GetProductByID mengambil produk berdasarkan ID-nya.
+// GetProductByID mengambil produk berdasarkan ID-nya, memuat juga variasi dan konfigurasinya.
 func (r *productRepository) GetProductByID(id uint64) (*models.Product, error) {
 	var product models.Product
-	if err := r.DB.Preload("ProductItems").First(&product, id).Error; err != nil {
+	if err := r.DB.
+		Preload("ProductItems.Configurations.ProductVariationOption").
+		First(&product, id).Error; err != nil {
 		return nil, err
 	}
 	return &product, nil
 }
 
-// GetAllProducts mengambil semua produk dari database.
+// GetAllProducts mengambil semua produk, memuat juga variasi dan konfigurasinya.
 func (r *productRepository) GetAllProducts() ([]*models.Product, error) {
 	var products []*models.Product
-	if err := r.DB.Preload("ProductItems").Find(&products).Error; err != nil {
+	if err := r.DB.
+		Preload("ProductItems.Configurations.ProductVariationOption").
+		Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil
 }
 
-// GetProductPublicByID mengambil produk berdasarkan ID-nya untuk user biasa.
+// GetProductPublicByID mengambil produk berdasarkan ID-nya untuk pengguna publik, memuat variasi, gambar, dan review.
 func (r *productRepository) GetProductPublicByID(id uint64) (*models.Product, error) {
 	var product models.Product
-	if err := r.DB.Preload("ProductItems").First(&product, id).Error; err != nil {
+	if err := r.DB.
+		Preload("ProductItems.Configurations.ProductVariationOption").
+		Preload("Reviews").
+		First(&product, id).Error; err != nil {
 		return nil, err
 	}
 	return &product, nil
 }
 
-// GetAllProductsPublic mengambil semua produk untuk user biasa.
+// GetAllProductsPublic mengambil semua produk untuk pengguna publik, memuat variasi, gambar, dan review.
 func (r *productRepository) GetAllProductsPublic() ([]*models.Product, error) {
 	var products []*models.Product
-	if err := r.DB.Preload("ProductItems").Find(&products).Error; err != nil {
+	if err := r.DB.
+		Preload("ProductItems.Configurations.ProductVariationOption").
+		Preload("Reviews").
+		Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil
@@ -139,7 +152,61 @@ func (r *productRepository) SearchProducts(query string) ([]*models.Product, err
 	searchTerm := "%" + query + "%"
 	// Menggunakan `Where` dengan `OR` untuk mencari kecocokan pada nama atau deskripsi.
 	// `Preload` digunakan untuk memuat data terkait (product items).
-	if err := r.DB.Where("name ILIKE ? OR description ILIKE ?", searchTerm, searchTerm).Preload("ProductItems").Find(&products).Error; err != nil {
+	if err := r.DB.
+		Preload("ProductItems.Configurations.ProductVariationOption").
+		Preload("Reviews").
+		Where("name ILIKE ? OR description ILIKE ?", searchTerm, searchTerm).Preload("ProductItems").Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
+// GetAllProductsPublicWithFilter mengambil semua produk publik dengan filter.
+func (r *productRepository) GetAllProductsPublicWithFilter(filter *dtos.ProductFilterRequestDTO) ([]*models.Product, error) {
+	var products []*models.Product
+	tx := r.DB.Model(&models.Product{})
+
+	tx.
+		Preload("ProductItems.Configurations.ProductVariationOption").
+		Preload("Reviews")
+
+	// Filter berdasarkan nama produk
+	if filter.Name != "" {
+		tx = tx.Where("name ILIKE ?", "%"+filter.Name+"%")
+	}
+
+	// Filter berdasarkan rentang harga
+	if filter.MinPrice > 0 {
+		// Menggunakan Joins untuk mengakses tabel product_items
+		tx = tx.Joins("JOIN product_items ON products.id = product_items.product_id").
+			Where("product_items.price >= ?", filter.MinPrice)
+	}
+	if filter.MaxPrice > 0 {
+		tx = tx.Joins("JOIN product_items ON products.id = product_items.product_id").
+			Where("product_items.price <= ?", filter.MaxPrice)
+	}
+
+	// Filter berdasarkan brand
+	if filter.BrandName != "" {
+		tx = tx.Joins("JOIN brands ON products.brand_id = brands.id").
+			Where("brands.name ILIKE ?", "%"+filter.BrandName+"%")
+	}
+
+	// Filter berdasarkan kategori
+	if filter.Category != "" {
+		tx = tx.Joins("JOIN product_categories ON products.id = product_categories.product_id").
+			Where("product_categories.category ILIKE ?", "%"+filter.Category+"%")
+	}
+
+	// Filter berdasarkan rating minimum
+	if filter.MinRating > 0 {
+		tx = tx.Where("rating >= ?", filter.MinRating)
+	}
+
+	// Menghindari duplikat jika menggunakan Joins
+	tx = tx.Group("products.id")
+
+	if err := tx.Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil

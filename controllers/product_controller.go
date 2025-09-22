@@ -26,6 +26,7 @@ type ProductController interface {
 	GetReviewsByProductIDPublic(c *fiber.Ctx) error // Endpoint baru
 	CreateReview(c *fiber.Ctx) error                // Endpoint baru
 	SearchProductsPublic(c *fiber.Ctx) error
+	GetAllProductsPublicWithFilter(c *fiber.Ctx) error
 }
 
 // productController is the implementation of ProductController.
@@ -224,4 +225,20 @@ func (ctrl *productController) SearchProductsPublic(c *fiber.Ctx) error {
 
 	response := dtos.ToProductResponseDTOs(products)
 	return utils.SendResponse(c, http.StatusOK, "Products found", response)
+}
+
+// GetAllProductsPublicWithFilter handles fetching products with filters for public users.
+func (ctrl *productController) GetAllProductsPublicWithFilter(c *fiber.Ctx) error {
+	var filterParams dtos.ProductFilterRequestDTO
+	if err := c.QueryParser(&filterParams); err != nil {
+		return utils.SendResponse(c, http.StatusBadRequest, "Invalid filter parameters: "+err.Error(), nil)
+	}
+
+	products, err := ctrl.productService.GetAllProductsPublicWithFilter(&filterParams)
+	if err != nil {
+		return utils.SendResponse(c, http.StatusInternalServerError, "Failed to retrieve products with filters", nil)
+	}
+
+	response := dtos.ToProductResponseDTOs(products)
+	return utils.SendResponse(c, http.StatusOK, "Products retrieved successfully with filters", response)
 }

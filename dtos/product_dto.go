@@ -97,6 +97,95 @@ func ToAdminProductResponseDTOs(products []*models.Product) []AdminProductRespon
 	return result
 }
 
+// ProductPublicResponseDTO mewakili data produk lengkap untuk pengguna publik, termasuk item produk dan ulasan.
+type ProductPublicResponseDTO struct {
+	ID           uint64           `json:"id"`
+	BrandID      uint64           `json:"brand_id"`
+	Name         string           `json:"name"`
+	Description  string           `json:"description"`
+	Discount     float64          `json:"discount"`
+	Rating       float64          `json:"rating"`
+	Reviewer     int              `json:"reviewer"`
+	CreatedAt    time.Time        `json:"created_at"`
+	UpdatedAt    time.Time        `json:"updated_at"`
+	ProductItems []ProductItemDTO `json:"product_items"`
+	Reviews      []ReviewDTO      `json:"reviews"`
+}
+
+// AdminProductDetailsDTO mewakili data produk lengkap untuk admin, termasuk item produk, kategori, dan ulasan.
+type AdminProductDetailsDTO struct {
+	ID                uint64               `json:"id"`
+	BrandID           uint64               `json:"brand_id"`
+	Name              string               `json:"name"`
+	Description       string               `json:"description"`
+	Discount          float64              `json:"discount"`
+	Rating            float64              `json:"rating"`
+	Reviewer          int                  `json:"reviewer"`
+	CreatedAt         time.Time            `json:"created_at"`
+	UpdatedAt         time.Time            `json:"updated_at"`
+	ProductItems      []ProductItemDTO     `json:"product_items"`
+	ProductCategories []ProductCategoryDTO `json:"product_categories"`
+	Reviews           []ReviewDTO          `json:"reviews"`
+}
+
+// ToProductPublicResponseDTO mengonversi model Product menjadi ProductPublicResponseDTO.
+func ToProductPublicResponseDTO(product *models.Product) ProductPublicResponseDTO {
+	productItems := make([]ProductItemDTO, len(product.ProductItems))
+	for i, item := range product.ProductItems {
+		productItems[i] = ToProductItemDTO(item)
+	}
+
+	reviews := make([]ReviewDTO, len(product.Reviews))
+	for i, review := range product.Reviews {
+		reviews[i] = ToReviewDTO(&review)
+	}
+
+	return ProductPublicResponseDTO{
+		ID:           product.ID,
+		BrandID:      product.BrandID,
+		Name:         product.Name,
+		Description:  product.Description,
+		Discount:     product.Discount,
+		Rating:       product.Rating,
+		Reviewer:     product.Reviewer,
+		CreatedAt:    product.CreatedAt,
+		UpdatedAt:    product.UpdatedAt,
+		ProductItems: productItems,
+		Reviews:      reviews,
+	}
+}
+
+// ToAdminProductDetailsDTO mengonversi model Product menjadi AdminProductDetailsDTO.
+func ToAdminProductDetailsDTO(product *models.Product) AdminProductDetailsDTO {
+	productItems := make([]ProductItemDTO, len(product.ProductItems))
+	for i, item := range product.ProductItems {
+		productItems[i] = ToProductItemDTO(item)
+	}
+	productCategories := make([]ProductCategoryDTO, len(product.ProductCategories))
+	for i, category := range product.ProductCategories {
+		productCategories[i] = ToProductCategoryDTO(&category)
+	}
+	reviews := make([]ReviewDTO, len(product.Reviews))
+	for i, review := range product.Reviews {
+		reviews[i] = ToReviewDTO(&review)
+	}
+
+	return AdminProductDetailsDTO{
+		ID:                product.ID,
+		BrandID:           product.BrandID,
+		Name:              product.Name,
+		Description:       product.Description,
+		Discount:          product.Discount,
+		Rating:            product.Rating,
+		Reviewer:          product.Reviewer,
+		CreatedAt:         product.CreatedAt,
+		UpdatedAt:         product.UpdatedAt,
+		ProductItems:      productItems,
+		ProductCategories: productCategories,
+		Reviews:           reviews,
+	}
+}
+
 // ReviewCreateDTO digunakan untuk membuat review produk baru.
 type ReviewCreateDTO struct {
 	ProductID  uint64 `json:"product_id"`
@@ -178,5 +267,49 @@ func ToProductItemDTO(item models.ProductItem) ProductItemDTO {
 		Price:     item.Price,
 		Stock:     item.Stock,
 		PhotoURL:  item.PhotoURL,
+	}
+}
+
+// ProductFilterRequestDTO is used for filtering products.
+type ProductFilterRequestDTO struct {
+	Name      string  `query:"name"`
+	MinPrice  float64 `query:"min_price"`
+	MaxPrice  float64 `query:"max_price"`
+	BrandName string  `query:"brand_name"`
+	Category  string  `query:"category"`
+	MinRating float64 `query:"min_rating"`
+}
+
+// ReviewDTO represents a product review.
+type ReviewDTO struct {
+	ID         uint64 `json:"id"`
+	ProductID  uint64 `json:"product_id"`
+	Rating     int    `json:"rating"`
+	ReviewText string `json:"review_text"`
+}
+
+// ProductCategoryDTO represents a product category.
+type ProductCategoryDTO struct {
+	ID        uint64 `json:"id"`
+	ProductID uint64 `json:"product_id"`
+	Category  string `json:"category"`
+}
+
+// ToReviewDTO mengonversi model Review menjadi ReviewDTO.
+func ToReviewDTO(review *models.Review) ReviewDTO {
+	return ReviewDTO{
+		ID:         review.ID,
+		ProductID:  review.ProductID,
+		Rating:     review.Rating,
+		ReviewText: review.ReviewText,
+	}
+}
+
+// ToProductCategoryDTO mengonversi model ProductCategory menjadi ProductCategoryDTO.
+func ToProductCategoryDTO(category *models.ProductCategory) ProductCategoryDTO {
+	return ProductCategoryDTO{
+		ID:        category.ID,
+		ProductID: category.ProductID,
+		Category:  category.Category,
 	}
 }

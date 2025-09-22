@@ -75,6 +75,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	productRoutes.Get("/", productController.GetAllProductsPublic)
 	productRoutes.Get("/:id", productController.GetProductPublicByID)
 	productRoutes.Get("/search", productController.SearchProductsPublic)
+	productRoutes.Get("/filter", productController.GetAllProductsPublicWithFilter)
 
 	// ---
 	// Setup public routes for the Product reviews.
