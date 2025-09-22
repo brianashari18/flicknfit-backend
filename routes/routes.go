@@ -26,44 +26,43 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	brandRepository := repositories.NewBrandRepository(db)
 	userRepository := repositories.NewUserRepository(db)
 	productRepository := repositories.NewProductRepository(db)
+	shoppingCartRepository := repositories.NewShoppingCartRepository(db)
 
 	// Initialize Services
 	brandService := services.NewBrandService(brandRepository)
 	userService := services.NewUserService(userRepository, cfg)
 	productService := services.NewProductService(productRepository)
+	shoppingCartService := services.NewShoppingCartService(shoppingCartRepository, productRepository)
 
 	// Initialize Controllers
 	brandController := controllers.NewBrandController(brandService, validator)
 	userController := controllers.NewUserController(userService, validator)
 	productController := controllers.NewProductController(productService, validator)
+	shoppingCartController := controllers.NewShoppingCartController(shoppingCartService, validator)
 
-	// Setup API group
-	api := app.Group("/api")
+	api := app.Group("/api/v1")
 
 	// ---
-	// Setup public routes for the User resource.
+	// Setup public routes for the User resource (Auth).
 	userRoutes := api.Group("/users")
-	userRoutes.Post("/register", userController.RegisterUser)
-	userRoutes.Post("/login", userController.LoginUser)
-	userRoutes.Post("/forgot-password", userController.ForgotPassword)
-	userRoutes.Post("/verify-otp", userController.VerifyOTP)
-	userRoutes.Post("/reset-password", userController.ResetPassword)
-	userRoutes.Post("/refresh-token", userController.RefreshToken)
+	userRoutes.Post("/register", userController.Register)
+	userRoutes.Post("/login", userController.Login)
 
-	// Setup private routes for the User resource.
-	privateRoutes := api.Group("/users")
-	privateRoutes.Use(middlewares.AuthMiddleware())
-	privateRoutes.Post("/logout", userController.LogoutUser)
-	privateRoutes.Get("/me", userController.GetUserByAccessToken)
-	privateRoutes.Patch("/edit-profile", userController.EditProfile)
+	// --
+	// Setup authenticated routes for the User resource.
+	userAuthRoutes := api.Group("/users")
+	userAuthRoutes.Use(middlewares.AuthMiddleware())
+	userAuthRoutes.Get("/profile", userController.GetUserProfile)
+	userAuthRoutes.Put("/profile", userController.UpdateUserProfile)
+	userAuthRoutes.Delete("/profile", userController.DeleteUser)
+	userAuthRoutes.Post("/logout", userController.Logout)
 
-	// ---
+	// --
 	// Setup admin routes for the User resource.
 	userAdminRoutes := api.Group("/admin/users")
 	userAdminRoutes.Use(middlewares.AuthMiddleware(), middlewares.AdminMiddleware())
-	userAdminRoutes.Post("/", userController.AdminCreateUser)
-	userAdminRoutes.Get("/", userController.AdminGetAllUsers)
 	userAdminRoutes.Get("/:id", userController.AdminGetUserByID)
+	userAdminRoutes.Get("/", userController.AdminGetAllUsers)
 	userAdminRoutes.Put("/:id", userController.AdminUpdateUser)
 	userAdminRoutes.Delete("/:id", userController.AdminDeleteUser)
 
@@ -72,6 +71,12 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	productRoutes := api.Group("/products")
 	productRoutes.Get("/", productController.GetAllProductsPublic)
 	productRoutes.Get("/:id", productController.GetProductPublicByID)
+
+	// ---
+	// Setup public routes for the Product reviews.
+	reviewRoutes := api.Group("/products")
+	reviewRoutes.Get("/:productID/reviews", productController.GetReviewsByProductIDPublic)
+	reviewRoutes.Post("/:productID/reviews", middlewares.AuthMiddleware(), productController.CreateReview)
 
 	// ---
 	// Setup admin routes for the Product resource.
@@ -95,4 +100,15 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	brandAdminRoutes.Post("/", brandController.AdminCreateBrand)
 	brandAdminRoutes.Put("/:id", brandController.AdminUpdateBrand)
 	brandAdminRoutes.Delete("/:id", brandController.AdminDeleteBrand)
+	brandAdminRoutes.Get("/:id", brandController.GetAllBrands)
+	brandAdminRoutes.Get("/", brandController.GetBrandByID)
+
+	// ---
+	// Setup shopping cart routes.
+	shoppingCartRoutes := api.Group("/cart")
+	shoppingCartRoutes.Use(middlewares.AuthMiddleware())
+	shoppingCartRoutes.Get("/", shoppingCartController.GetUserCart)
+	shoppingCartRoutes.Post("/", shoppingCartController.AddProductItemToCart)
+	shoppingCartRoutes.Put("/:itemId", shoppingCartController.UpdateProductItemInCart)
+	shoppingCartRoutes.Delete("/:itemId", shoppingCartController.RemoveProductItemFromCart)
 }

@@ -23,6 +23,7 @@ type ProductService interface {
 	// Metode untuk user biasa
 	GetProductPublicByID(id uint64) (*models.Product, error)
 	GetAllProductsPublic() ([]*models.Product, error)
+	CreateReviewPublic(dto *dtos.ReviewCreateDTO) (*models.Review, error)
 }
 
 // productService adalah implementasi dari ProductService.
@@ -31,20 +32,19 @@ type productService struct {
 }
 
 // NewProductService membuat dan mengembalikan instance baru dari ProductService.
-func NewProductService(productRepo repositories.ProductRepository) ProductService {
+func NewProductService(productRepository repositories.ProductRepository) ProductService {
 	return &productService{
-		productRepository: productRepo,
+		productRepository: productRepository,
 	}
 }
 
 // AdminCreateProduct mengimplementasikan logika untuk membuat produk baru.
 func (s *productService) AdminCreateProduct(dto *dtos.AdminProductCreateRequestDTO) (*models.Product, error) {
 	product := &models.Product{
+		BrandID:     dto.BrandID,
 		Name:        dto.Name,
 		Description: dto.Description,
 		Discount:    dto.Discount,
-		Rating:      dto.Rating,
-		Reviewer:    dto.Reviewer,
 	}
 	if err := s.productRepository.CreateProduct(product); err != nil {
 		return nil, err
@@ -59,6 +59,9 @@ func (s *productService) AdminUpdateProduct(id uint64, dto *dtos.AdminProductUpd
 		return nil, errors.New("product not found")
 	}
 
+	if dto.BrandID != 0 {
+		product.BrandID = dto.BrandID
+	}
 	if dto.Name != "" {
 		product.Name = dto.Name
 	}
@@ -71,9 +74,12 @@ func (s *productService) AdminUpdateProduct(id uint64, dto *dtos.AdminProductUpd
 	if dto.Rating != 0 {
 		product.Rating = dto.Rating
 	}
+	if dto.Reviewer != 0 {
+		product.Reviewer = dto.Reviewer
+	}
 
 	if err := s.productRepository.UpdateProduct(product); err != nil {
-		return nil, err
+		return nil, errors.New("failed to update product")
 	}
 	return product, nil
 }
@@ -83,22 +89,22 @@ func (s *productService) AdminDeleteProduct(id uint64) error {
 	return s.productRepository.DeleteProduct(id)
 }
 
-// AdminGetProductByID mengimplementasikan logika untuk mendapatkan produk berdasarkan ID untuk admin.
+// AdminGetProductByID mengimplementasikan logika untuk mendapatkan produk berdasarkan ID.
 func (s *productService) AdminGetProductByID(id uint64) (*models.Product, error) {
 	return s.productRepository.GetProductByID(id)
 }
 
-// AdminGetAllProducts mengimplementasikan logika untuk mendapatkan semua produk untuk admin.
+// AdminGetAllProducts mengimplementasikan logika untuk mendapatkan semua produk.
 func (s *productService) AdminGetAllProducts() ([]*models.Product, error) {
 	return s.productRepository.GetAllProducts()
 }
 
-// GetProductPublicByID mengimplementasikan logika untuk mendapatkan produk berdasarkan ID untuk user biasa.
+// GetProductPublicByID mengimplementasikan logika untuk mendapatkan produk publik.
 func (s *productService) GetProductPublicByID(id uint64) (*models.Product, error) {
 	return s.productRepository.GetProductPublicByID(id)
 }
 
-// GetAllProductsPublic mengimplementasikan logika untuk mendapatkan semua produk untuk user biasa.
+// GetAllProductsPublic mengimplementasikan logika untuk mendapatkan semua produk publik.
 func (s *productService) GetAllProductsPublic() ([]*models.Product, error) {
 	return s.productRepository.GetAllProductsPublic()
 }
@@ -136,7 +142,7 @@ func (s *productService) AdminUpdateReview(reviewID uint64, dto *dtos.AdminRevie
 	}
 
 	if err := s.productRepository.UpdateReview(review); err != nil {
-		return nil, err
+		return nil, errors.New("failed to update review")
 	}
 	return review, nil
 }
@@ -144,4 +150,18 @@ func (s *productService) AdminUpdateReview(reviewID uint64, dto *dtos.AdminRevie
 // AdminDeleteReview mengimplementasikan logika untuk menghapus review.
 func (s *productService) AdminDeleteReview(reviewID uint64) error {
 	return s.productRepository.DeleteReview(reviewID)
+}
+
+// CreateReviewPublic mengimplementasikan logika untuk membuat review publik.
+func (s *productService) CreateReviewPublic(dto *dtos.ReviewCreateDTO) (*models.Review, error) {
+	review := &models.Review{
+		ProductID:  dto.ProductID,
+		Rating:     dto.Rating,
+		ReviewText: dto.ReviewText,
+	}
+
+	if err := s.productRepository.CreateReview(review); err != nil {
+		return nil, err
+	}
+	return review, nil
 }

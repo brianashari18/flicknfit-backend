@@ -36,33 +36,31 @@ func ToProductResponseDTO(product *models.Product) ProductResponseDTO {
 // ToProductResponseDTOs mengonversi slice model Product menjadi slice ProductResponseDTO.
 func ToProductResponseDTOs(products []*models.Product) []ProductResponseDTO {
 	result := make([]ProductResponseDTO, len(products))
-	for i, product := range products {
-		result[i] = ToProductResponseDTO(product)
+	for i, p := range products {
+		result[i] = ToProductResponseDTO(p)
 	}
 	return result
 }
 
-// AdminProductCreateRequestDTO digunakan untuk permintaan pembuatan produk oleh admin.
+// AdminProductCreateRequestDTO digunakan untuk membuat produk baru oleh admin.
 type AdminProductCreateRequestDTO struct {
 	BrandID     uint64  `json:"brand_id" validate:"required"`
-	Name        string  `json:"name" validate:"required,min=3,max=255"`
-	Description string  `json:"description" validate:"required,min=10"`
-	Discount    float64 `json:"discount" validate:"required,gte=0,lte=1"`
-	Rating      float64 `json:"rating" validate:"omitempty,gte=0,lte=5"`
-	Reviewer    int     `json:"reviewer" validate:"omitempty,min=0"`
+	Name        string  `json:"name" validate:"required"`
+	Description string  `json:"description" validate:"required"`
+	Discount    float64 `json:"discount" validate:"min=0,max=1"`
 }
 
-// AdminProductUpdateRequestDTO digunakan untuk permintaan pembaruan produk oleh admin.
+// AdminProductUpdateRequestDTO digunakan untuk memperbarui produk oleh admin.
 type AdminProductUpdateRequestDTO struct {
 	BrandID     uint64  `json:"brand_id" validate:"omitempty"`
-	Name        string  `json:"name" validate:"omitempty,min=3,max=255"`
-	Description string  `json:"description" validate:"omitempty,min=10"`
-	Discount    float64 `json:"discount" validate:"omitempty,gte=0,lte=1"`
-	Rating      float64 `json:"rating" validate:"omitempty,gte=0,lte=5"`
+	Name        string  `json:"name" validate:"omitempty"`
+	Description string  `json:"description" validate:"omitempty"`
+	Discount    float64 `json:"discount" validate:"omitempty,min=0,max=1"`
+	Rating      float64 `json:"rating" validate:"omitempty,min=0,max=5"`
 	Reviewer    int     `json:"reviewer" validate:"omitempty,min=0"`
 }
 
-// AdminProductResponseDTO digunakan untuk tanggapan API produk admin.
+// AdminProductResponseDTO merepresentasikan data produk yang dikembalikan ke admin.
 type AdminProductResponseDTO struct {
 	ID          uint64    `json:"id"`
 	BrandID     uint64    `json:"brand_id"`
@@ -90,13 +88,48 @@ func ToAdminProductResponseDTO(product *models.Product) AdminProductResponseDTO 
 	}
 }
 
-// AdminReviewCreateRequestDTO is used for creating a new review by an admin.
-type AdminReviewCreateRequestDTO struct {
-	Rating     int    `json:"rating" validate:"required,min=1,max=5"`
-	ReviewText string `json:"review_text" validate:"required"`
+// ToAdminProductResponseDTOs mengonversi slice model Product menjadi slice AdminProductResponseDTO.
+func ToAdminProductResponseDTOs(products []*models.Product) []AdminProductResponseDTO {
+	result := make([]AdminProductResponseDTO, len(products))
+	for i, p := range products {
+		result[i] = ToAdminProductResponseDTO(p)
+	}
+	return result
 }
 
-// AdminReviewUpdateRequestDTO is used for updating an existing review by an admin.
+// ReviewCreateDTO digunakan untuk membuat review produk baru.
+type ReviewCreateDTO struct {
+	ProductID  uint64 `json:"product_id"`
+	UserID     uint64 `json:"user_id"`
+	Rating     int    `json:"rating" validate:"required,min=1,max=5"`
+	ReviewText string `json:"review_text"`
+}
+
+// ReviewResponseDTO represents the review data returned to a public user.
+type ReviewResponseDTO struct {
+	ID         uint64 `json:"id"`
+	ProductID  uint64 `json:"product_id"`
+	Rating     int    `json:"rating"`
+	ReviewText string `json:"review_text"`
+}
+
+// ToReviewResponseDTO converts a Review model to a ReviewResponseDTO.
+func ToReviewResponseDTO(review *models.Review) ReviewResponseDTO {
+	return ReviewResponseDTO{
+		ID:         review.ID,
+		ProductID:  review.ProductID,
+		Rating:     review.Rating,
+		ReviewText: review.ReviewText,
+	}
+}
+
+// AdminReviewCreateRequestDTO digunakan untuk membuat review oleh admin.
+type AdminReviewCreateRequestDTO struct {
+	Rating     int    `json:"rating" validate:"required,min=1,max=5"`
+	ReviewText string `json:"review_text"`
+}
+
+// AdminReviewUpdateRequestDTO digunakan untuk memperbarui review oleh admin.
 type AdminReviewUpdateRequestDTO struct {
 	Rating     int    `json:"rating" validate:"omitempty,min=1,max=5"`
 	ReviewText string `json:"review_text" validate:"omitempty"`
