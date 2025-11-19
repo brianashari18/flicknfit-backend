@@ -1,53 +1,28 @@
 package middlewares
 
 import (
-	"flicknfit_backend/services"
+	"flicknfit_backend/utils"
 	"net/http"
-	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
 )
 
-// AdminMiddleware adalah middleware untuk memverifikasi token otentikasi
-// dan memeriksa apakah pengguna memiliki peran 'admin'.
+// AdminMiddleware checks if the authenticated user has admin role
+// This middleware should be used after AuthMiddleware
 func AdminMiddleware() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		authHeader := c.Get("Authorization")
-		if authHeader == "" {
-			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
-				"message": "Missing authorization header",
-			})
+		// Get user role from previous auth middleware
+		role, exists := c.Locals("role").(string)
+		if !exists {
+			return utils.SendResponse(c, http.StatusUnauthorized, "User not authenticated", nil)
 		}
 
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
-				"message": "Invalid authorization header format",
-			})
+		// Check if user has admin role
+		if role != "admin" {
+			return utils.SendResponse(c, http.StatusForbidden, "Admin access required", nil)
 		}
 
-		tokenString := parts[1]
-		claims := &services.CustomClaims{}
-
-		// Parse token tanpa verifikasi, hanya untuk mendapatkan claims
-		_, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return nil, nil
-		})
-		if err != nil && claims.Role != "admin" {
-			return c.Status(http.StatusForbidden).JSON(fiber.Map{
-				"message": "Access denied. Admin role required.",
-			})
-		}
-
-		// Verifikasi role
-		if claims.Role != "admin" {
-			return c.Status(http.StatusForbidden).JSON(fiber.Map{
-				"message": "Access denied. Admin role required.",
-			})
-		}
-
-		// Lanjutkan ke handler berikutnya jika verifikasi berhasil
+		// Continue to next handler if verification successful
 		return c.Next()
 	}
 }

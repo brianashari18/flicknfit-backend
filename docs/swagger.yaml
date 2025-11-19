@@ -1,0 +1,2437 @@
+basePath: /api/v1
+definitions:
+  dtos.AddFavoriteDTO:
+    properties:
+      product_item_id:
+        type: integer
+    required:
+    - product_item_id
+    type: object
+  dtos.AddProductItemToCartRequestDTO:
+    properties:
+      product_item_id:
+        type: integer
+      quantity:
+        minimum: 1
+        type: integer
+    required:
+    - product_item_id
+    - quantity
+    type: object
+  dtos.AdminProductCreateRequestDTO:
+    properties:
+      brand_id:
+        type: integer
+      description:
+        type: string
+      discount:
+        maximum: 1
+        minimum: 0
+        type: number
+      name:
+        type: string
+    required:
+    - brand_id
+    - description
+    - name
+    type: object
+  dtos.AdminProductResponseDTO:
+    properties:
+      brand_id:
+        type: integer
+      created_at:
+        type: string
+      description:
+        type: string
+      discount:
+        type: number
+      id:
+        type: integer
+      name:
+        type: string
+      rating:
+        type: number
+      reviewer:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  dtos.AdminProductUpdateRequestDTO:
+    properties:
+      brand_id:
+        type: integer
+      description:
+        type: string
+      discount:
+        maximum: 1
+        minimum: 0
+        type: number
+      name:
+        type: string
+      rating:
+        maximum: 5
+        minimum: 0
+        type: number
+      reviewer:
+        minimum: 0
+        type: integer
+    type: object
+  dtos.AdminReviewResponseDTO:
+    properties:
+      id:
+        type: integer
+      product_id:
+        type: integer
+      rating:
+        type: integer
+      review_text:
+        type: string
+    type: object
+  dtos.BrandCreateRequestDTO:
+    properties:
+      description:
+        maxLength: 255
+        minLength: 1
+        type: string
+      logo_url:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 1
+        type: string
+      website_url:
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  dtos.BrandResponseDTO:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      logo_url:
+        type: string
+      name:
+        type: string
+      rating:
+        type: number
+      reviewer:
+        type: integer
+      total_products:
+        type: integer
+      updated_at:
+        type: string
+      website_url:
+        type: string
+    type: object
+  dtos.BrandUpdateRequestDTO:
+    properties:
+      description:
+        maxLength: 255
+        minLength: 1
+        type: string
+      logo_url:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 1
+        type: string
+      website_url:
+        type: string
+    type: object
+  dtos.CreateReviewDTO:
+    properties:
+      product_id:
+        type: integer
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+      review_text:
+        maxLength: 1000
+        minLength: 10
+        type: string
+    required:
+    - product_id
+    - rating
+    - review_text
+    type: object
+  dtos.CreateWardrobeItemDTO:
+    properties:
+      category:
+        maxLength: 50
+        minLength: 2
+        type: string
+      image_url:
+        type: string
+    required:
+    - category
+    - image_url
+    type: object
+  dtos.FavoriteResponseDTO:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      product_item:
+        $ref: '#/definitions/dtos.ProductItemResponseDTO'
+      product_item_id:
+        type: integer
+    type: object
+  dtos.ForgotPasswordDTO:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  dtos.PaginationDTO:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dtos.ProductBasicResponseDTO:
+    properties:
+      brand_id:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      rating:
+        type: number
+      reviewer:
+        type: integer
+    type: object
+  dtos.ProductItemDTO:
+    properties:
+      id:
+        type: integer
+      photo_url:
+        type: string
+      price:
+        type: integer
+      product_id:
+        type: integer
+      sku:
+        type: string
+      stock:
+        type: integer
+    type: object
+  dtos.ProductItemResponseDTO:
+    properties:
+      id:
+        type: integer
+      photo_url:
+        type: string
+      price:
+        type: integer
+      product:
+        $ref: '#/definitions/dtos.ProductBasicResponseDTO'
+      sku:
+        type: string
+      stock:
+        type: integer
+    type: object
+  dtos.ProductResponseDTO:
+    properties:
+      brand_id:
+        type: integer
+      created_at:
+        type: string
+      description:
+        type: string
+      discount:
+        type: number
+      id:
+        type: integer
+      name:
+        type: string
+      rating:
+        type: number
+      reviewer:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  dtos.ReviewCreateDTO:
+    properties:
+      product_id:
+        type: integer
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+      review_text:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - rating
+    type: object
+  dtos.ReviewListResponseDTO:
+    properties:
+      pagination:
+        $ref: '#/definitions/dtos.PaginationDTO'
+      reviews:
+        items:
+          $ref: '#/definitions/dtos.ReviewResponseDTO'
+        type: array
+      statistics:
+        additionalProperties: true
+        type: object
+    type: object
+  dtos.ReviewResponseDTO:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      product_id:
+        type: integer
+      rating:
+        type: integer
+      review_text:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/dtos.UserBasicResponseDTO'
+      user_id:
+        type: integer
+    type: object
+  dtos.ShoppingCartDTO:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/dtos.ShoppingCartItemDTO'
+        type: array
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  dtos.ShoppingCartItemDTO:
+    properties:
+      id:
+        type: integer
+      item_price:
+        type: integer
+      product_item:
+        $ref: '#/definitions/dtos.ProductItemDTO'
+      product_item_id:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  dtos.UpdateProductItemInCartRequestDTO:
+    properties:
+      quantity:
+        minimum: 1
+        type: integer
+    required:
+    - quantity
+    type: object
+  dtos.UpdateWardrobeItemDTO:
+    properties:
+      category:
+        maxLength: 50
+        minLength: 2
+        type: string
+      image_url:
+        type: string
+    type: object
+  dtos.UserAdminCreateRequestDTO:
+    properties:
+      birthday:
+        type: string
+      email:
+        type: string
+      gender:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      phone_number:
+        type: string
+      region:
+        type: string
+      role:
+        enum:
+        - admin
+        - user
+        type: string
+      username:
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - role
+    - username
+    type: object
+  dtos.UserAdminResponseDTO:
+    properties:
+      birthday:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      otp:
+        type: string
+      otp_expired_at:
+        type: string
+      password:
+        type: string
+      phone_number:
+        type: string
+      refresh_token:
+        type: string
+      refresh_token_expired_at:
+        type: string
+      region:
+        type: string
+      reset_token:
+        type: string
+      reset_token_exp_at:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  dtos.UserAdminUpdateRequestDTO:
+    properties:
+      birthday:
+        type: string
+      email:
+        type: string
+      gender:
+        type: string
+      phone_number:
+        type: string
+      region:
+        type: string
+      username:
+        minLength: 3
+        type: string
+    type: object
+  dtos.UserBasicResponseDTO:
+    properties:
+      full_name:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
+  dtos.UserEditProfileRequestDTO:
+    properties:
+      birthday:
+        type: string
+      email:
+        type: string
+      gender:
+        enum:
+        - male
+        - female
+        - other
+        type: string
+      phone_number:
+        type: string
+      region:
+        maxLength: 100
+        minLength: 2
+        type: string
+      username:
+        maxLength: 30
+        minLength: 3
+        type: string
+    type: object
+  dtos.UserEditProfileResponseDTO:
+    properties:
+      birthday:
+        type: string
+      email:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      phone_number:
+        type: string
+      region:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  dtos.UserLoginRequestDTO:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dtos.UserLoginResponseDTO:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  dtos.UserRegisterRequestDTO:
+    properties:
+      confirm_password:
+        minLength: 8
+        type: string
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      phone_number:
+        type: string
+      username:
+        maxLength: 30
+        minLength: 3
+        type: string
+    required:
+    - confirm_password
+    - email
+    - password
+    - phone_number
+    - username
+    type: object
+  dtos.UserResetPasswordRequestDTO:
+    properties:
+      confirm_password:
+        type: string
+      email:
+        type: string
+      new_password:
+        minLength: 8
+        type: string
+      reset_token:
+        type: string
+    required:
+    - confirm_password
+    - email
+    - new_password
+    - reset_token
+    type: object
+  dtos.UserResetTokenResponseDTO:
+    properties:
+      expired_at:
+        type: string
+      reset_token:
+        type: string
+    type: object
+  dtos.UserResponseDTO:
+    properties:
+      birthday:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      phone_number:
+        type: string
+      region:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  dtos.VerifyOTPDTO:
+    properties:
+      email:
+        type: string
+      otp:
+        type: string
+    required:
+    - email
+    - otp
+    type: object
+  dtos.WardrobeItemResponseDTO:
+    properties:
+      category:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  dtos.WardrobeResponseDTO:
+    properties:
+      categories:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/dtos.WardrobeItemResponseDTO'
+          type: array
+        type: object
+      summary:
+        $ref: '#/definitions/dtos.WardrobeSummaryDTO'
+    type: object
+  dtos.WardrobeSummaryDTO:
+    properties:
+      categories:
+        items:
+          type: string
+        type: array
+      categories_count:
+        type: integer
+      total_items:
+        type: integer
+    type: object
+  utils.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact:
+    email: support@flicknfit.com
+    name: FlickNFit API Support
+    url: http://www.flicknfit.com/support
+  description: FlickNFit backend API - Fashion recommendation and wardrobe management
+    system
+  license:
+    name: MIT
+    url: https://github.com/flicknfit/backend/blob/main/LICENSE
+  termsOfService: http://swagger.io/terms/
+  title: FlickNFit API
+  version: "1.0"
+paths:
+  /admin/brands:
+    post:
+      consumes:
+      - application/json
+      description: Create a new brand in the system
+      parameters:
+      - description: Brand creation data
+        in: body
+        name: brand
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.BrandCreateRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Brand created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.BrandResponseDTO'
+              type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new brand (Admin only)
+      tags:
+      - Admin - Brand Management
+  /admin/brands/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Permanently delete a brand from the system
+      parameters:
+      - description: Brand ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Brand deleted successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid brand ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Brand not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete brand (Admin only)
+      tags:
+      - Admin - Brand Management
+    put:
+      consumes:
+      - application/json
+      description: Update an existing brand's information
+      parameters:
+      - description: Brand ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Brand update data
+        in: body
+        name: brand
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.BrandUpdateRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Brand updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.BrandResponseDTO'
+              type: object
+        "400":
+          description: Invalid request body or brand ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Brand not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update brand (Admin only)
+      tags:
+      - Admin - Brand Management
+  /admin/products:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all products for admin management
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Products retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.AdminProductResponseDTO'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all products (Admin only)
+      tags:
+      - Admin - Product Management
+    post:
+      consumes:
+      - application/json
+      description: Create a new product with full details
+      parameters:
+      - description: Product creation data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AdminProductCreateRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Product created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.ProductResponseDTO'
+              type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new product (Admin only)
+      tags:
+      - Admin - Product Management
+  /admin/products/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Permanently delete a product from the system
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product deleted successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete product (Admin only)
+      tags:
+      - Admin - Product Management
+    get:
+      consumes:
+      - application/json
+      description: Retrieve detailed product information for admin users
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.AdminProductResponseDTO'
+              type: object
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get product by ID (Admin only)
+      tags:
+      - Admin - Product Management
+    put:
+      consumes:
+      - application/json
+      description: Update an existing product's information
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Product update data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AdminProductUpdateRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.AdminProductResponseDTO'
+              type: object
+        "400":
+          description: Invalid request body or product ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update product (Admin only)
+      tags:
+      - Admin - Product Management
+  /admin/users:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all registered users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Users retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.UserAdminResponseDTO'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all users (Admin only)
+      tags:
+      - Admin - User Management
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account with admin privileges
+      parameters:
+      - description: User creation data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserAdminCreateRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.UserResponseDTO'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "409":
+          description: User already exists
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new user (Admin only)
+      tags:
+      - Admin - User Management
+  /admin/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Permanently delete a user account
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete user (Admin only)
+      tags:
+      - Admin - User Management
+    get:
+      consumes:
+      - application/json
+      description: Retrieve detailed information about a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.UserAdminResponseDTO'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user by ID (Admin only)
+      tags:
+      - Admin - User Management
+    put:
+      consumes:
+      - application/json
+      description: Update user information by admin
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User update data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserAdminUpdateRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User updated successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden - Admin access required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update user (Admin only)
+      tags:
+      - Admin - User Management
+  /auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Initiate password reset process by sending OTP to email
+      parameters:
+      - description: Email for password reset
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ForgotPasswordDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP sent to email
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Email not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Forgot password
+      tags:
+      - Authentication
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT tokens
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserLoginRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.UserLoginResponseDTO'
+              type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: User login
+      tags:
+      - Authentication
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout user by invalidating refresh token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout successful
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: User logout
+      tags:
+      - Authentication
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Generate new access token using refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: token
+        required: true
+        schema:
+          properties:
+            refresh_token:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token refreshed successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.UserLoginResponseDTO'
+              type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Invalid or expired refresh token
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Refresh access token
+      tags:
+      - Authentication
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account
+      parameters:
+      - description: User registration data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserRegisterRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "409":
+          description: User already exists
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Register a new user
+      tags:
+      - Authentication
+  /auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Set a new password using reset token
+      parameters:
+      - description: New password data
+        in: body
+        name: password
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserResetPasswordRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password reset successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid request body or token expired
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Reset password
+      tags:
+      - Authentication
+  /auth/verify-otp:
+    post:
+      consumes:
+      - application/json
+      description: Verify OTP code for password reset
+      parameters:
+      - description: OTP verification data
+        in: body
+        name: otp
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.VerifyOTPDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP verified successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.UserResetTokenResponseDTO'
+              type: object
+        "400":
+          description: Invalid OTP or expired
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Verify OTP
+      tags:
+      - Authentication
+  /brands:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all available brands
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Brands retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.BrandResponseDTO'
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get all brands
+      tags:
+      - Brands
+  /brands/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve detailed information about a specific brand
+      parameters:
+      - description: Brand ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Brand retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.BrandResponseDTO'
+              type: object
+        "400":
+          description: Invalid brand ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Brand not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get brand by ID
+      tags:
+      - Brands
+  /cart:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all items in the authenticated user's shopping cart
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Shopping cart retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.ShoppingCartDTO'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user's shopping cart
+      tags:
+      - Shopping Cart
+  /cart/items:
+    post:
+      consumes:
+      - application/json
+      description: Add a product item to the authenticated user's shopping cart
+      parameters:
+      - description: Product item to add
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AddProductItemToCartRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product item added to cart successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.ShoppingCartDTO'
+              type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Add product to cart
+      tags:
+      - Shopping Cart
+  /cart/items/{itemId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a product item from the shopping cart
+      parameters:
+      - description: Cart Item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cart item removed successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid cart item ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Cart item not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove item from cart
+      tags:
+      - Shopping Cart
+    put:
+      consumes:
+      - application/json
+      description: Update quantity of a product item in the shopping cart
+      parameters:
+      - description: Cart Item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      - description: Updated item data
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UpdateProductItemInCartRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cart item updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.ShoppingCartDTO'
+              type: object
+        "400":
+          description: Invalid request body or item ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Cart item not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update cart item
+      tags:
+      - Shopping Cart
+  /favorites:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all products marked as favorites by the authenticated
+        user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Favorites retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.FavoriteResponseDTO'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user's favorite products
+      tags:
+      - Favorites
+    post:
+      consumes:
+      - application/json
+      description: Add a product item to user's favorite list
+      parameters:
+      - description: Product item to add to favorites
+        in: body
+        name: favorite
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AddFavoriteDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Product added to favorites successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Product item not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "409":
+          description: Product already in favorites
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Add product to favorites
+      tags:
+      - Favorites
+  /favorites/{productId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a product item from user's favorite list
+      parameters:
+      - description: Product Item ID to remove from favorites
+        in: path
+        name: productId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Removed from favorites successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid product item ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Product not in favorites
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove product from favorites
+      tags:
+      - Favorites
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all available products for public viewing
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Products retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.ProductResponseDTO'
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get all products
+      tags:
+      - Products
+  /products/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve detailed product information for public viewing
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product found
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.ProductResponseDTO'
+              type: object
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get product by ID
+      tags:
+      - Products
+  /products/{productId}/review:
+    post:
+      consumes:
+      - application/json
+      description: Create a new review for a specific product
+      parameters:
+      - description: Product ID
+        in: path
+        name: productID
+        required: true
+        type: string
+      - description: Review data
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ReviewCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Review created successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid request body or product ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create product review
+      tags:
+      - Reviews
+  /products/{productId}/reviews:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated reviews for a specific product
+      parameters:
+      - description: Product ID
+        in: path
+        name: productId
+        required: true
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reviews retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.ReviewListResponseDTO'
+              type: object
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get product reviews
+      tags:
+      - Reviews
+  /products/{productId}/reviews-list:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all reviews for a specific product
+      parameters:
+      - description: Product ID
+        in: path
+        name: productID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reviews retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.AdminReviewResponseDTO'
+                  type: array
+              type: object
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Reviews not found for this product
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get product reviews
+      tags:
+      - Products
+  /products/filter:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve products with advanced filtering options (category, brand,
+        price range, etc.)
+      parameters:
+      - description: Product category
+        in: query
+        name: category
+        type: string
+      - description: Brand name
+        in: query
+        name: brand
+        type: string
+      - description: Minimum price
+        in: query
+        name: min_price
+        type: number
+      - description: Maximum price
+        in: query
+        name: max_price
+        type: number
+      - description: Sort by (price, name, created_at)
+        in: query
+        name: sort
+        type: string
+      - description: Order direction (asc, desc)
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Products retrieved successfully with filters
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.ProductResponseDTO'
+                  type: array
+              type: object
+        "400":
+          description: Invalid filter parameters
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get products with filters
+      tags:
+      - Products
+  /products/search:
+    get:
+      consumes:
+      - application/json
+      description: Search for products by name, description, or other criteria
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Products found successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.ProductResponseDTO'
+                  type: array
+              type: object
+        "400":
+          description: Search query 'q' is required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Search products
+      tags:
+      - Products
+  /reviews:
+    post:
+      consumes:
+      - application/json
+      description: Create a new review for a product by authenticated user
+      parameters:
+      - description: Review data
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateReviewDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Review created successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "409":
+          description: User already reviewed this product
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a product review
+      tags:
+      - Reviews
+  /user/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get current authenticated user's profile information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.UserResponseDTO'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get current user profile
+      tags:
+      - User Profile
+    put:
+      consumes:
+      - application/json
+      description: Update current user's profile information
+      parameters:
+      - description: Profile update data
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserEditProfileRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.UserEditProfileResponseDTO'
+              type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Edit user profile
+      tags:
+      - User Profile
+  /wardrobe:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve user's complete wardrobe organized by clothing categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Wardrobe retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.WardrobeResponseDTO'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user's wardrobe
+      tags:
+      - Wardrobe
+    post:
+      consumes:
+      - application/json
+      description: Add a new clothing item to user's wardrobe
+      parameters:
+      - description: Wardrobe item data
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateWardrobeItemDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Item added to wardrobe successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Add item to wardrobe
+      tags:
+      - Wardrobe
+  /wardrobe/{itemId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a clothing item from user's wardrobe
+      parameters:
+      - description: Wardrobe item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Wardrobe item deleted successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid item ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Wardrobe item not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete wardrobe item
+      tags:
+      - Wardrobe
+    put:
+      consumes:
+      - application/json
+      description: Update an existing clothing item in user's wardrobe
+      parameters:
+      - description: Wardrobe item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      - description: Updated wardrobe item data
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UpdateWardrobeItemDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Wardrobe item updated successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid request body or item ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Wardrobe item not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update wardrobe item
+      tags:
+      - Wardrobe
+  /wardrobe/categories:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all unique clothing categories in user's wardrobe
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Wardrobe categories retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get wardrobe categories
+      tags:
+      - Wardrobe
+  /wardrobe/category/{category}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve wardrobe items filtered by specific clothing category
+      parameters:
+      - description: Clothing category
+        in: path
+        name: category
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Wardrobe items retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.WardrobeItemResponseDTO'
+                  type: array
+              type: object
+        "400":
+          description: Category is required
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get wardrobe items by category
+      tags:
+      - Wardrobe
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

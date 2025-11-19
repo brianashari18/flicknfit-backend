@@ -31,3 +31,18 @@ func GetUserID(c *fiber.Ctx) (uint64, error) {
 		return 0, fiber.NewError(fiber.StatusUnauthorized, "invalid user id type")
 	}
 }
+
+// GetUintParam extracts and converts a URL parameter to uint64
+func GetUintParam(c *fiber.Ctx, paramName string) (uint64, error) {
+	paramStr := c.Params(paramName)
+	if paramStr == "" {
+		return 0, fiber.NewError(fiber.StatusBadRequest, "parameter "+paramName+" is required")
+	}
+
+	param, err := strconv.ParseUint(paramStr, 10, 64)
+	if err != nil {
+		return 0, fiber.NewError(fiber.StatusBadRequest, "invalid "+paramName+" format")
+	}
+
+	return param, nil
+}

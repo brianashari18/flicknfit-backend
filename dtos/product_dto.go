@@ -194,24 +194,6 @@ type ReviewCreateDTO struct {
 	ReviewText string `json:"review_text"`
 }
 
-// ReviewResponseDTO represents the review data returned to a public user.
-type ReviewResponseDTO struct {
-	ID         uint64 `json:"id"`
-	ProductID  uint64 `json:"product_id"`
-	Rating     int    `json:"rating"`
-	ReviewText string `json:"review_text"`
-}
-
-// ToReviewResponseDTO converts a Review model to a ReviewResponseDTO.
-func ToReviewResponseDTO(review *models.Review) ReviewResponseDTO {
-	return ReviewResponseDTO{
-		ID:         review.ID,
-		ProductID:  review.ProductID,
-		Rating:     review.Rating,
-		ReviewText: review.ReviewText,
-	}
-}
-
 // AdminReviewCreateRequestDTO digunakan untuk membuat review oleh admin.
 type AdminReviewCreateRequestDTO struct {
 	Rating     int    `json:"rating" validate:"required,min=1,max=5"`

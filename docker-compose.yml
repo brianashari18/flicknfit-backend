@@ -1,0 +1,77 @@
+version: "3.8"
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: flicknfit_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: flicknfit_backend
+      MYSQL_USER: flicknfit
+      MYSQL_PASSWORD: flicknfit123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - flicknfit_network
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: flicknfit_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - flicknfit_network
+
+  # Backend API
+  api:
+    build: .
+    container_name: flicknfit_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_PORT=8000
+      - DB_USER=flicknfit
+      - DB_PASSWORD=flicknfit123
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=flicknfit_backend
+      - JWT_SECRET_KEY=your_super_secret_jwt_key_for_development_only
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_USER=your_email@gmail.com
+      - SMTP_PASSWORD=your_app_password
+      - SMTP_PORT=587
+    depends_on:
+      - db
+      - redis
+    networks:
+      - flicknfit_network
+    volumes:
+      - ./logs:/root/logs
+
+  # Adminer for database management (optional)
+  adminer:
+    image: adminer
+    container_name: flicknfit_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - flicknfit_network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  flicknfit_network:
+    driver: bridge

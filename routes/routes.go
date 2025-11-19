@@ -1,119 +1,163 @@
 package routes
 
 import (
-	"flicknfit_backend/config"
-	"flicknfit_backend/controllers"
+	"flicknfit_backend/container"
 	"flicknfit_backend/middlewares"
-	"flicknfit_backend/repositories"
-	"flicknfit_backend/services"
-	"flicknfit_backend/utils"
-	"log"
 
 	"github.com/gofiber/fiber/v2"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
 	"gorm.io/gorm"
 )
 
-// SetupRoutes sets up all API routes for the application.
-// It initializes the repositories, services, and controllers internally.
-func SetupRoutes(app *fiber.App, db *gorm.DB) {
-	validator := utils.NewValidator()
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		log.Fatal("Config not loaded")
-	}
+// SetupRoutes sets up all API routes for the application with clean structure.
+func SetupRoutes(app *fiber.App, db *gorm.DB, container *container.Container) {
+	// Setup common security and performance middlewares
+	middlewares.SetupCommonMiddlewares(app)
 
-	// Initialize Repositories
-	brandRepository := repositories.NewBrandRepository(db)
-	userRepository := repositories.NewUserRepository(db)
-	productRepository := repositories.NewProductRepository(db)
-	shoppingCartRepository := repositories.NewShoppingCartRepository(db)
+	// Add global error handling middlewares
+	app.Use(middlewares.ErrorHandler())
+	app.Use(middlewares.RecoverHandler())
 
-	// Initialize Services
-	brandService := services.NewBrandService(brandRepository)
-	userService := services.NewUserService(userRepository, cfg)
-	productService := services.NewProductService(productRepository)
-	shoppingCartService := services.NewShoppingCartService(shoppingCartRepository, productRepository)
+	// Setup Swagger documentation
+	app.Get("/swagger/*", fiberSwagger.WrapHandler)
 
-	// Initialize Controllers
-	brandController := controllers.NewBrandController(brandService, validator)
-	userController := controllers.NewUserController(userService, validator)
-	productController := controllers.NewProductController(productService, validator)
-	shoppingCartController := controllers.NewShoppingCartController(shoppingCartService, validator)
+	// Setup API routes
+	setupAPIRoutes(app, container)
+}
 
+// setupAPIRoutes configures all API routes
+func setupAPIRoutes(app *fiber.App, container *container.Container) {
 	api := app.Group("/api/v1")
 
-	// ---
-	// Setup public routes for the User resource.
-	userRoutes := api.Group("/users")
-	userRoutes.Post("/register", userController.RegisterUser)
-	userRoutes.Post("/login", userController.LoginUser)
-	userRoutes.Post("/forgot-password", userController.ForgotPassword)
-	userRoutes.Post("/verify-otp", userController.VerifyOTP)
-	userRoutes.Post("/reset-password", userController.ResetPassword)
-	userRoutes.Post("/refresh-token", userController.RefreshToken)
+	// Setup API-specific middlewares
+	middlewares.SetupAPIMiddlewares(api)
+	// Setup user routes
+	setupUserRoutes(api, container)
 
-	// Setup private routes for the User resource.
+	// Setup product routes
+	setupProductRoutes(api, container)
+
+	// Setup brand routes
+	setupBrandRoutes(api, container)
+
+	// Setup shopping cart routes
+	setupShoppingCartRoutes(api, container)
+
+	// Setup new feature routes
+	setupFavoriteRoutes(api, container)
+	setupReviewRoutes(api, container)
+	setupWardrobeRoutes(api, container)
+}
+
+// setupUserRoutes configures all user-related routes
+func setupUserRoutes(api fiber.Router, c *container.Container) {
+	// Public user routes with auth rate limiting
+	userRoutes := api.Group("/users")
+	middlewares.SetupAuthMiddlewares(userRoutes)
+
+	userRoutes.Post("/register", c.Controllers.User.RegisterUser)
+	userRoutes.Post("/login", c.Controllers.User.LoginUser)
+	userRoutes.Post("/forgot-password", c.Controllers.User.ForgotPassword)
+	userRoutes.Post("/verify-otp", c.Controllers.User.VerifyOTP)
+	userRoutes.Post("/reset-password", c.Controllers.User.ResetPassword)
+	userRoutes.Post("/refresh-token", c.Controllers.User.RefreshToken)
+
+	// Private user routes (requires authentication)
 	privateRoutes := api.Group("/users")
 	privateRoutes.Use(middlewares.AuthMiddleware())
-	privateRoutes.Post("/logout", userController.LogoutUser)
-	privateRoutes.Get("/me", userController.GetUserByAccessToken)
-	privateRoutes.Patch("/edit-profile", userController.EditProfile)
+	privateRoutes.Post("/logout", c.Controllers.User.LogoutUser)
+	privateRoutes.Get("/me", c.Controllers.User.GetUserByAccessToken)
+	privateRoutes.Patch("/edit-profile", c.Controllers.User.EditProfile)
 
-	// ---
-	// Setup admin routes for the User resource.
+	// Admin user routes (requires authentication + admin role)
 	userAdminRoutes := api.Group("/admin/users")
 	userAdminRoutes.Use(middlewares.AuthMiddleware(), middlewares.AdminMiddleware())
-	userAdminRoutes.Post("/", userController.AdminCreateUser)
-	userAdminRoutes.Get("/", userController.AdminGetAllUsers)
-	userAdminRoutes.Get("/:id", userController.AdminGetUserByID)
-	userAdminRoutes.Put("/:id", userController.AdminUpdateUser)
-	userAdminRoutes.Delete("/:id", userController.AdminDeleteUser)
+	userAdminRoutes.Post("/", c.Controllers.User.AdminCreateUser)
+	userAdminRoutes.Get("/", c.Controllers.User.AdminGetAllUsers)
+	userAdminRoutes.Get("/:id", c.Controllers.User.AdminGetUserByID)
+	userAdminRoutes.Put("/:id", c.Controllers.User.AdminUpdateUser)
+	userAdminRoutes.Delete("/:id", c.Controllers.User.AdminDeleteUser)
+}
 
-	// ---
-	// Setup public routes for the Product resource.
+// setupProductRoutes configures all product-related routes
+func setupProductRoutes(api fiber.Router, c *container.Container) {
+	// Public product routes
 	productRoutes := api.Group("/products")
-	productRoutes.Get("/", productController.GetAllProductsPublic)
-	productRoutes.Get("/:id", productController.GetProductPublicByID)
-	productRoutes.Get("/search", productController.SearchProductsPublic)
-	productRoutes.Get("/filter", productController.GetAllProductsPublicWithFilter)
+	productRoutes.Get("/", c.Controllers.Product.GetAllProductsPublic)
+	productRoutes.Get("/:id", c.Controllers.Product.GetProductPublicByID)
+	productRoutes.Get("/search", c.Controllers.Product.SearchProductsPublic)
+	productRoutes.Get("/filter", c.Controllers.Product.GetAllProductsPublicWithFilter)
 
-	// ---
-	// Setup public routes for the Product reviews.
-	reviewRoutes := api.Group("/products")
-	reviewRoutes.Get("/:productID/reviews", productController.GetReviewsByProductIDPublic)
-	reviewRoutes.Post("/:productID/reviews", middlewares.AuthMiddleware(), productController.CreateReview)
-
-	// ---
-	// Setup admin routes for the Product resource.
+	// Admin product routes
 	productAdminRoutes := api.Group("/admin/products")
 	productAdminRoutes.Use(middlewares.AuthMiddleware(), middlewares.AdminMiddleware())
-	productAdminRoutes.Post("/", productController.AdminCreateProduct)
-	productAdminRoutes.Get("/", productController.AdminGetAllProducts)
-	productAdminRoutes.Get("/:id", productController.AdminGetProductByID)
-	productAdminRoutes.Put("/:id", productController.AdminUpdateProduct)
-	productAdminRoutes.Delete("/:id", productController.AdminDeleteProduct)
+	productAdminRoutes.Post("/", c.Controllers.Product.AdminCreateProduct)
+	productAdminRoutes.Get("/", c.Controllers.Product.AdminGetAllProducts)
+	productAdminRoutes.Get("/:id", c.Controllers.Product.AdminGetProductByID)
+	productAdminRoutes.Put("/:id", c.Controllers.Product.AdminUpdateProduct)
+	productAdminRoutes.Delete("/:id", c.Controllers.Product.AdminDeleteProduct)
+}
 
-	// ---
-	// Setup public routes for the Brand resource.
+// setupBrandRoutes configures all brand-related routes
+func setupBrandRoutes(api fiber.Router, c *container.Container) {
+	// Public brand routes
 	brandRoutes := api.Group("/brands")
-	brandRoutes.Get("/", brandController.GetAllBrands)
-	brandRoutes.Get("/:id", brandController.GetBrandByID)
+	brandRoutes.Get("/", c.Controllers.Brand.GetAllBrands)
+	brandRoutes.Get("/:id", c.Controllers.Brand.GetBrandByID)
 
-	// Setup admin routes for the Brand resource.
+	// Admin brand routes
 	brandAdminRoutes := api.Group("/admin/brands")
 	brandAdminRoutes.Use(middlewares.AuthMiddleware(), middlewares.AdminMiddleware())
-	brandAdminRoutes.Post("/", brandController.AdminCreateBrand)
-	brandAdminRoutes.Put("/:id", brandController.AdminUpdateBrand)
-	brandAdminRoutes.Delete("/:id", brandController.AdminDeleteBrand)
-	brandAdminRoutes.Get("/:id", brandController.GetAllBrands)
-	brandAdminRoutes.Get("/", brandController.GetBrandByID)
+	brandAdminRoutes.Post("/", c.Controllers.Brand.AdminCreateBrand)
+	brandAdminRoutes.Put("/:id", c.Controllers.Brand.AdminUpdateBrand)
+	brandAdminRoutes.Delete("/:id", c.Controllers.Brand.AdminDeleteBrand)
+}
 
-	// ---
-	// Setup shopping cart routes.
+// setupShoppingCartRoutes configures all shopping cart routes
+func setupShoppingCartRoutes(api fiber.Router, c *container.Container) {
+	// All cart routes require authentication
 	shoppingCartRoutes := api.Group("/cart")
 	shoppingCartRoutes.Use(middlewares.AuthMiddleware())
-	shoppingCartRoutes.Get("/", shoppingCartController.GetUserCart)
-	shoppingCartRoutes.Post("/", shoppingCartController.AddProductItemToCart)
-	shoppingCartRoutes.Put("/:itemId", shoppingCartController.UpdateProductItemInCart)
-	shoppingCartRoutes.Delete("/:itemId", shoppingCartController.RemoveProductItemFromCart)
+	shoppingCartRoutes.Get("/", c.Controllers.ShoppingCart.GetUserCart)
+	shoppingCartRoutes.Post("/", c.Controllers.ShoppingCart.AddProductItemToCart)
+	shoppingCartRoutes.Put("/:itemId", c.Controllers.ShoppingCart.UpdateProductItemInCart)
+	shoppingCartRoutes.Delete("/:itemId", c.Controllers.ShoppingCart.RemoveProductItemFromCart)
+}
+
+// setupFavoriteRoutes configures all favorite-related routes
+func setupFavoriteRoutes(api fiber.Router, c *container.Container) {
+	// All favorite routes require authentication
+	favoriteRoutes := api.Group("/favorites")
+	favoriteRoutes.Use(middlewares.AuthMiddleware())
+	favoriteRoutes.Get("/", c.Controllers.Favorite.GetUserFavorites)
+	favoriteRoutes.Post("/:productId", c.Controllers.Favorite.ToggleFavorite)
+	favoriteRoutes.Delete("/:productId", c.Controllers.Favorite.RemoveFavorite)
+}
+
+// setupReviewRoutes configures all review-related routes
+func setupReviewRoutes(api fiber.Router, c *container.Container) {
+	// Public review routes
+	reviewRoutes := api.Group("/reviews")
+	reviewRoutes.Get("/product/:productId", c.Controllers.Review.GetProductReviews)
+	reviewRoutes.Get("/product/:productId/stats", c.Controllers.Review.GetProductReviewStats)
+
+	// Authenticated review routes
+	authReviewRoutes := api.Group("/reviews")
+	authReviewRoutes.Use(middlewares.AuthMiddleware())
+	authReviewRoutes.Post("/", c.Controllers.Review.CreateReview)
+	authReviewRoutes.Put("/:reviewId", c.Controllers.Review.UpdateReview)
+	authReviewRoutes.Delete("/:reviewId", c.Controllers.Review.DeleteReview)
+	authReviewRoutes.Get("/user", c.Controllers.Review.GetUserReviews)
+}
+
+// setupWardrobeRoutes configures all wardrobe-related routes
+func setupWardrobeRoutes(api fiber.Router, c *container.Container) {
+	// All wardrobe routes require authentication
+	wardrobeRoutes := api.Group("/wardrobe")
+	wardrobeRoutes.Use(middlewares.AuthMiddleware())
+	wardrobeRoutes.Get("/", c.Controllers.Wardrobe.GetUserWardrobe)
+	wardrobeRoutes.Post("/", c.Controllers.Wardrobe.CreateWardrobeItem)
+	wardrobeRoutes.Put("/:itemId", c.Controllers.Wardrobe.UpdateWardrobeItem)
+	wardrobeRoutes.Delete("/:itemId", c.Controllers.Wardrobe.DeleteWardrobeItem)
+	wardrobeRoutes.Get("/categories", c.Controllers.Wardrobe.GetWardrobeCategories)
 }

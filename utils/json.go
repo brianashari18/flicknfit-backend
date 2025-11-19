@@ -9,6 +9,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// Response is a type alias for ResponseDTO used in Swagger documentation
+type Response = dtos.ResponseDTO
+
 func StrictBodyParser(c *fiber.Ctx, out interface{}) error {
 	dec := json.NewDecoder(bytes.NewReader(c.Body()))
 	dec.DisallowUnknownFields()

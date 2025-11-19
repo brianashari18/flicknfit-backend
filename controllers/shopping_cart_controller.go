@@ -34,6 +34,16 @@ func NewShoppingCartController(shoppingCartService services.ShoppingCartService,
 }
 
 // GetUserCart handles fetching the user's shopping cart.
+// @Summary Get user's shopping cart
+// @Description Retrieve all items in the authenticated user's shopping cart
+// @Tags Shopping Cart
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} utils.Response{data=dtos.ShoppingCartDTO} "Shopping cart retrieved successfully"
+// @Failure 401 {object} utils.Response "Unauthorized"
+// @Failure 500 {object} utils.Response "Internal server error"
+// @Router /cart [get]
 func (ctrl *shoppingCartController) GetUserCart(c *fiber.Ctx) error {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
@@ -50,6 +60,18 @@ func (ctrl *shoppingCartController) GetUserCart(c *fiber.Ctx) error {
 }
 
 // AddProductItemToCart handles adding an item to the shopping cart.
+// @Summary Add product to cart
+// @Description Add a product item to the authenticated user's shopping cart
+// @Tags Shopping Cart
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param item body dtos.AddProductItemToCartRequestDTO true "Product item to add"
+// @Success 200 {object} utils.Response{data=dtos.ShoppingCartDTO} "Product item added to cart successfully"
+// @Failure 400 {object} utils.Response "Invalid request body or validation failed"
+// @Failure 401 {object} utils.Response "Unauthorized"
+// @Failure 500 {object} utils.Response "Internal server error"
+// @Router /cart/items [post]
 func (ctrl *shoppingCartController) AddProductItemToCart(c *fiber.Ctx) error {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
@@ -74,6 +96,20 @@ func (ctrl *shoppingCartController) AddProductItemToCart(c *fiber.Ctx) error {
 }
 
 // UpdateProductItemInCart handles updating the quantity of a product item in the cart.
+// @Summary Update cart item
+// @Description Update quantity of a product item in the shopping cart
+// @Tags Shopping Cart
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param itemId path string true "Cart Item ID"
+// @Param item body dtos.UpdateProductItemInCartRequestDTO true "Updated item data"
+// @Success 200 {object} utils.Response{data=dtos.ShoppingCartDTO} "Cart item updated successfully"
+// @Failure 400 {object} utils.Response "Invalid request body or item ID"
+// @Failure 401 {object} utils.Response "Unauthorized"
+// @Failure 404 {object} utils.Response "Cart item not found"
+// @Failure 500 {object} utils.Response "Internal server error"
+// @Router /cart/items/{itemId} [put]
 func (ctrl *shoppingCartController) UpdateProductItemInCart(c *fiber.Ctx) error {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
@@ -103,6 +139,19 @@ func (ctrl *shoppingCartController) UpdateProductItemInCart(c *fiber.Ctx) error 
 }
 
 // RemoveProductItemFromCart handles removing an item from the shopping cart.
+// @Summary Remove item from cart
+// @Description Remove a product item from the shopping cart
+// @Tags Shopping Cart
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param itemId path string true "Cart Item ID"
+// @Success 200 {object} utils.Response "Cart item removed successfully"
+// @Failure 400 {object} utils.Response "Invalid cart item ID"
+// @Failure 401 {object} utils.Response "Unauthorized"
+// @Failure 404 {object} utils.Response "Cart item not found"
+// @Failure 500 {object} utils.Response "Internal server error"
+// @Router /cart/items/{itemId} [delete]
 func (ctrl *shoppingCartController) RemoveProductItemFromCart(c *fiber.Ctx) error {
 	userID, err := utils.GetUserID(c)
 	if err != nil {

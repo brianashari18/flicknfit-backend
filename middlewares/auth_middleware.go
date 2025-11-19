@@ -10,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// AuthMiddleware adalah middleware untuk memverifikasi token otentikasi.
+// AuthMiddleware verifies authentication tokens and sets user context
 func AuthMiddleware() fiber.Handler {
 	appLogger := utils.NewLogger()
 
@@ -22,16 +22,12 @@ func AuthMiddleware() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"message": "Missing authorization header",
-			})
+			return utils.SendError(c, fiber.StatusUnauthorized, "Missing authorization header")
 		}
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"message": "Invalid authorization header format",
-			})
+			return utils.SendError(c, fiber.StatusUnauthorized, "Invalid authorization header format")
 		}
 
 		tokenString := parts[1]
@@ -39,14 +35,13 @@ func AuthMiddleware() fiber.Handler {
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(cfg.JwtSecretKey), nil
 		})
-
 		if err != nil || !token.Valid {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"message": "Invalid or expired access token",
-			})
+			return utils.SendError(c, fiber.StatusUnauthorized, "Invalid or expired access token")
 		}
 
+		// Store user information in context for next middlewares/handlers
 		c.Locals("userID", claims.UserID)
+		c.Locals("role", claims.Role)
 
 		return c.Next()
 	}
