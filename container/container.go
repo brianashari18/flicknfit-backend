@@ -41,6 +41,7 @@ type Services struct {
 	Favorite     services.FavoriteService
 	Review       services.ReviewService
 	Wardrobe     services.WardrobeService
+	AI           services.AIService
 }
 
 // Controllers holds all controller instances
@@ -52,6 +53,7 @@ type Controllers struct {
 	Favorite     controllers.FavoriteController
 	Review       controllers.ReviewController
 	Wardrobe     controllers.WardrobeController
+	AI           controllers.AIController
 }
 
 // NewContainer creates and initializes a new container with all dependencies
@@ -98,6 +100,7 @@ func (c *Container) initServices() {
 		Favorite:     services.NewFavoriteService(c.Repositories.Favorite, c.Repositories.Product),
 		Review:       services.NewReviewService(c.Repositories.Review, c.Repositories.Product),
 		Wardrobe:     services.NewWardrobeService(c.Repositories.Wardrobe),
+		AI:           services.NewAIService(c.Config),
 	}
 }
 
@@ -111,5 +114,6 @@ func (c *Container) initControllers() {
 		Favorite:     controllers.NewFavoriteController(c.Services.Favorite, c.Validator),
 		Review:       controllers.NewReviewController(c.Services.Review, c.Validator),
 		Wardrobe:     controllers.NewWardrobeController(c.Services.Wardrobe, c.Validator),
+		AI:           controllers.NewAIController(c.Services.AI),
 	}
 }

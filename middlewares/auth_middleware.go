@@ -29,12 +29,12 @@ func AuthMiddleware() fiber.Handler {
 		if len(parts) != 2 || parts[0] != "Bearer" {
 			return utils.SendError(c, fiber.StatusUnauthorized, "Invalid authorization header format")
 		}
-
 		tokenString := parts[1]
 		claims := &services.CustomClaims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(cfg.JwtSecretKey), nil
 		})
+
 		if err != nil || !token.Valid {
 			return utils.SendError(c, fiber.StatusUnauthorized, "Invalid or expired access token")
 		}

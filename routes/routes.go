@@ -42,11 +42,13 @@ func setupAPIRoutes(app *fiber.App, container *container.Container) {
 
 	// Setup shopping cart routes
 	setupShoppingCartRoutes(api, container)
-
 	// Setup new feature routes
 	setupFavoriteRoutes(api, container)
 	setupReviewRoutes(api, container)
 	setupWardrobeRoutes(api, container)
+
+	// Setup AI prediction routes
+	setupAIRoutes(api, container)
 }
 
 // setupUserRoutes configures all user-related routes
@@ -160,4 +162,17 @@ func setupWardrobeRoutes(api fiber.Router, c *container.Container) {
 	wardrobeRoutes.Put("/:itemId", c.Controllers.Wardrobe.UpdateWardrobeItem)
 	wardrobeRoutes.Delete("/:itemId", c.Controllers.Wardrobe.DeleteWardrobeItem)
 	wardrobeRoutes.Get("/categories", c.Controllers.Wardrobe.GetWardrobeCategories)
+}
+
+// setupAIRoutes configures all AI prediction-related routes
+func setupAIRoutes(api fiber.Router, c *container.Container) {
+	// All AI prediction routes require authentication
+	aiRoutes := api.Group("/ai")
+	aiRoutes.Use(middlewares.AuthMiddleware())
+
+	// AI prediction endpoints
+	predictionRoutes := aiRoutes.Group("/predict")
+	predictionRoutes.Post("/skin-color-tone", c.Controllers.AI.PredictSkinColorTone)
+	predictionRoutes.Post("/woman-body-scan", c.Controllers.AI.PredictWomanBodyScan)
+	predictionRoutes.Post("/men-body-scan", c.Controllers.AI.PredictMenBodyScan)
 }

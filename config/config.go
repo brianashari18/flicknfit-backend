@@ -23,6 +23,7 @@ type Config struct {
 	SmtpUser     string
 	SmtpPassword string
 	SmtpPort     string
+	AIApiURL     string
 }
 
 // LoadConfig reads the configuration from environment variables.
@@ -45,6 +46,7 @@ func LoadConfig() (*Config, error) {
 		SmtpUser:     os.Getenv("SMTP_USER"),
 		SmtpPassword: os.Getenv("SMTP_PASSWORD"),
 		SmtpPort:     os.Getenv("SMTP_PORT"),
+		AIApiURL:     os.Getenv("AI_API_URL"),
 	}
 
 	// Simple validation to ensure critical variables are set.
@@ -56,6 +58,9 @@ func LoadConfig() (*Config, error) {
 	}
 	if cfg.JwtSecretKey == "" {
 		return nil, errors.New("JWT_SECRET_KEY environment variable is not set")
+	}
+	if cfg.AIApiURL == "" {
+		return nil, errors.New("AI_API_URL environment variable is not set")
 	}
 
 	return cfg, nil

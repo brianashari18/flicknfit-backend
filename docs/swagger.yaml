@@ -1226,6 +1226,113 @@ paths:
       summary: Update user (Admin only)
       tags:
       - Admin - User Management
+  /ai/predict/men-body-scan:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Analyze uploaded image to predict body type and measurements for
+        men
+      parameters:
+      - description: Image file for body scanning
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Body measurements predicted successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid file or request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error or AI API error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Scan men's body measurements
+      tags:
+      - AI Predictions
+  /ai/predict/skin-color-tone:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Analyze uploaded image to predict user's skin color tone
+      parameters:
+      - description: Image file for skin color tone analysis
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Skin color tone predicted successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid file or request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error or AI API error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Predict skin color tone
+      tags:
+      - AI Predictions
+  /ai/predict/woman-body-scan:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Analyze uploaded image to predict body type and measurements for
+        women
+      parameters:
+      - description: Image file for body scanning
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Body measurements predicted successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid file or request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error or AI API error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Scan woman's body measurements
+      tags:
+      - AI Predictions
   /auth/forgot-password:
     post:
       consumes:
