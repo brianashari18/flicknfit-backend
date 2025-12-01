@@ -7,7 +7,7 @@ import (
 
 // UserLoginDTO is used for user authentication.
 type UserLoginRequestDTO struct {
-	Email    string `json:"email" validate:"required,email"`
+	Username string `json:"username" validate:"required,min=3,max=30"`
 	Password string `json:"password" validate:"required"`
 }
 

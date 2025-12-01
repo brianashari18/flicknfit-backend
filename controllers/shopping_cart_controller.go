@@ -71,7 +71,7 @@ func (ctrl *shoppingCartController) GetUserCart(c *fiber.Ctx) error {
 // @Failure 400 {object} utils.Response "Invalid request body or validation failed"
 // @Failure 401 {object} utils.Response "Unauthorized"
 // @Failure 500 {object} utils.Response "Internal server error"
-// @Router /cart/items [post]
+// @Router /cart [post]
 func (ctrl *shoppingCartController) AddProductItemToCart(c *fiber.Ctx) error {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
@@ -109,7 +109,7 @@ func (ctrl *shoppingCartController) AddProductItemToCart(c *fiber.Ctx) error {
 // @Failure 401 {object} utils.Response "Unauthorized"
 // @Failure 404 {object} utils.Response "Cart item not found"
 // @Failure 500 {object} utils.Response "Internal server error"
-// @Router /cart/items/{itemId} [put]
+// @Router /cart/{itemId} [put]
 func (ctrl *shoppingCartController) UpdateProductItemInCart(c *fiber.Ctx) error {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
@@ -151,7 +151,7 @@ func (ctrl *shoppingCartController) UpdateProductItemInCart(c *fiber.Ctx) error 
 // @Failure 401 {object} utils.Response "Unauthorized"
 // @Failure 404 {object} utils.Response "Cart item not found"
 // @Failure 500 {object} utils.Response "Internal server error"
-// @Router /cart/items/{itemId} [delete]
+// @Router /cart/{itemId} [delete]
 func (ctrl *shoppingCartController) RemoveProductItemFromCart(c *fiber.Ctx) error {
 	userID, err := utils.GetUserID(c)
 	if err != nil {

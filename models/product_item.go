@@ -9,6 +9,7 @@ type ProductItem struct {
 	SKU       string `gorm:"size:20;not null;unique" json:"sku"`
 	Price     int    `gorm:"not null" json:"price"`
 	Stock     int    `gorm:"not null" json:"stock"`
+	Sold      int    `gorm:"default:0" json:"sold"`
 	PhotoURL  string `gorm:"size:255" json:"photo_url"`
 
 	// Relationships

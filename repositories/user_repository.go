@@ -14,7 +14,9 @@ type UserRepository interface {
 	GetAllUsers() ([]*models.User, error)
 	GetUserByID(id uint64) (*models.User, error)
 	GetUserByEmail(email string) (*models.User, error)
+	GetUserByUsername(username string) (*models.User, error)
 	GetUserByRefreshToken(token string) (*models.User, error)
+	GetUserByAuthProvider(authProviderID string, authProvider models.AuthProvider) (*models.User, error)
 	UpdateUser(user *models.User) error
 	DeleteUser(user *models.User) error
 }
@@ -27,6 +29,15 @@ type userRepository struct {
 // NewUserRepository creates and returns a new instance of UserRepository.
 func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{BaseRepository{DB: db}}
+}
+
+// GetUserByUsername retrieves a user record by their username.
+func (r *userRepository) GetUserByUsername(username string) (*models.User, error) {
+	var user models.User
+	if err := r.DB.Where("username = ?", username).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 // CreateUser creates a new user record in the database.
@@ -64,6 +75,15 @@ func (r *userRepository) GetUserByEmail(email string) (*models.User, error) {
 func (r *userRepository) GetUserByRefreshToken(token string) (*models.User, error) {
 	var user models.User
 	if err := r.DB.Where("refresh_token = ?", token).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// GetUserByAuthProvider retrieves a user by OAuth provider ID and provider type
+func (r *userRepository) GetUserByAuthProvider(authProviderID string, authProvider models.AuthProvider) (*models.User, error) {
+	var user models.User
+	if err := r.DB.Where("auth_provider_id = ? AND auth_provider = ?", authProviderID, authProvider).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

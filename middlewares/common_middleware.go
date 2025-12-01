@@ -25,7 +25,7 @@ func SetupCommonMiddlewares(app *fiber.App) {
 
 	// CORS middleware - handles Cross-Origin Resource Sharing
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:3000,http://localhost:8080,https://flicknfit.com",
+		AllowOrigins:     "http://192.168.2.41:3000,http://192.168.2.41:8000,https://flicknfit.com",
 		AllowMethods:     "GET,POST,PUT,DELETE,PATCH,OPTIONS",
 		AllowHeaders:     "Origin,Content-Type,Accept,Authorization,X-Requested-With",
 		ExposeHeaders:    "Content-Length,X-Request-ID",

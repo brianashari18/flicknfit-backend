@@ -212,7 +212,7 @@ func (ctrl *userController) RegisterUser(c *fiber.Ctx) error {
 // @Tags Authentication
 // @Accept json
 // @Produce json
-// @Param credentials body dtos.UserLoginRequestDTO true "Login credentials"
+// @Param request body dtos.UserLoginRequestDTO true "Login credentials"
 // @Success 200 {object} utils.Response{data=dtos.UserLoginResponseDTO} "Login successful"
 // @Failure 400 {object} utils.Response "Invalid request body or validation failed"
 // @Failure 401 {object} utils.Response "Invalid credentials"
@@ -322,7 +322,7 @@ func (ctrl *userController) ResetPassword(c *fiber.Ctx) error {
 // @Success 200 {object} utils.Response "Logout successful"
 // @Failure 401 {object} utils.Response "Unauthorized"
 // @Failure 500 {object} utils.Response "Internal server error"
-// @Router /auth/logout [post]
+// @Router /users/logout [post]
 func (ctrl *userController) LogoutUser(c *fiber.Ctx) error {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
@@ -345,7 +345,7 @@ func (ctrl *userController) LogoutUser(c *fiber.Ctx) error {
 // @Failure 401 {object} utils.Response "Unauthorized"
 // @Failure 404 {object} utils.Response "User not found"
 // @Failure 500 {object} utils.Response "Internal server error"
-// @Router /user/profile [get]
+// @Router /users/me [get]
 func (ctrl *userController) GetUserByAccessToken(c *fiber.Ctx) error {
 	userID, err := utils.GetUserID(c)
 	if err != nil {
@@ -371,7 +371,7 @@ func (ctrl *userController) GetUserByAccessToken(c *fiber.Ctx) error {
 // @Failure 400 {object} utils.Response "Invalid request body"
 // @Failure 401 {object} utils.Response "Invalid or expired refresh token"
 // @Failure 500 {object} utils.Response "Internal server error"
-// @Router /auth/refresh [post]
+// @Router /auth/refresh-token [post]
 func (ctrl *userController) RefreshToken(c *fiber.Ctx) error {
 	var body struct {
 		RefreshToken string `json:"refresh_token"`
@@ -403,7 +403,7 @@ func (ctrl *userController) RefreshToken(c *fiber.Ctx) error {
 // @Failure 400 {object} utils.Response "Invalid request body or validation failed"
 // @Failure 401 {object} utils.Response "Unauthorized"
 // @Failure 500 {object} utils.Response "Internal server error"
-// @Router /user/profile [put]
+// @Router /users/edit-profile [patch]
 func (ctrl *userController) EditProfile(c *fiber.Ctx) error {
 	var dto dtos.UserEditProfileRequestDTO
 	if err := utils.StrictBodyParser(c, &dto); err != nil {

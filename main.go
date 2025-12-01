@@ -3,10 +3,12 @@ package main
 import (
 	"log"
 
+	"flicknfit_backend/admin"
 	"flicknfit_backend/config"
 	"flicknfit_backend/container"
 	"flicknfit_backend/database"
 	"flicknfit_backend/routes"
+	"flicknfit_backend/seeders"
 	"flicknfit_backend/utils"
 	"log/slog"
 
@@ -28,7 +30,7 @@ import (
 // @license.name MIT
 // @license.url https://github.com/flicknfit/backend/blob/main/LICENSE
 
-// @host localhost:8000
+// @host 192.168.2.41:8000
 // @BasePath /api/v1
 
 // @securityDefinitions.apikey BearerAuth
@@ -60,6 +62,11 @@ func main() {
 	} // Automatically migrate the database schema.
 	database.Migrate(db, appLogger)
 
+	// Jalankan semua seeder sekaligus
+	if err := seeders.SeedAll(db); err != nil {
+		appLogger.Fatalf("Seeder error: %v", err)
+	}
+
 	// Initialize the dependency injection container
 	appContainer, err := container.NewContainer(db, cfg)
 	if err != nil {
@@ -82,13 +89,25 @@ func main() {
 		},
 		AppName: "FlickNFit API v1.0",
 	})
-
 	// Set up the API routes with middlewares
 	routes.SetupRoutes(app, db, appContainer)
+	// Setup Simple Admin Dashboard
+	adminConfig := &admin.AdminConfig{
+		DB:     db,
+		Config: cfg,
+	}
+
+	if err := admin.SetupAdmin(app, adminConfig); err != nil {
+		appLogger.Error("Failed to setup admin dashboard", slog.Any("error", err))
+		// Continue running without admin - non-critical
+		log.Printf("Warning: Admin dashboard not available: %v", err)
+	} else {
+		log.Printf("✅ Admin dashboard available at http://localhost:%s/admin", cfg.AppPort)
+	}
 
 	// Start the server and listen on the specified port.
-	log.Printf("Server starting on port %s", cfg.AppPort)
-	if err := app.Listen(":" + cfg.AppPort); err != nil {
+	log.Printf("Server starting on %s:%s", cfg.AppHost, cfg.AppPort)
+	if err := app.Listen(cfg.AppHost + ":" + cfg.AppPort); err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}
 }

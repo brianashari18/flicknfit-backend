@@ -38,6 +38,7 @@ type UserService interface {
 	LogoutUser(userID uint64) error
 	RefreshToken(token string) (*models.LoginToken, error)
 	EditProfile(id uint64, dto *dtos.UserEditProfileRequestDTO) (*models.User, error)
+	OAuthLogin(dto *dtos.OAuthLoginRequestDTO, firebaseUID string) (*models.LoginToken, error)
 }
 
 // userService is the implementation of UserService.
@@ -185,7 +186,7 @@ func (s *userService) LoginUser(dto *dtos.UserLoginRequestDTO) (*models.LoginTok
 	logger := utils.GetLogger()
 	logger.Info("START")
 
-	user, err := s.userRepository.GetUserByEmail(dto.Email)
+	user, err := s.userRepository.GetUserByUsername(dto.Username)
 	if err != nil {
 		return nil, errors.New("user not found or invalid credentials")
 	}
@@ -397,4 +398,111 @@ func (s *userService) EditProfile(id uint64, dto *dtos.UserEditProfileRequestDTO
 	}
 
 	return user, nil
+}
+
+// OAuthLogin handles login/registration via Firebase OAuth (Google/Facebook)
+func (s *userService) OAuthLogin(dto *dtos.OAuthLoginRequestDTO, firebaseUID string) (*models.LoginToken, error) {
+	logger := utils.GetLogger()
+
+	// Map string provider to enum
+	var authProvider models.AuthProvider
+	if dto.AuthProvider == "google" {
+		authProvider = models.GoogleAuthProvider
+	} else if dto.AuthProvider == "facebook" {
+		authProvider = models.FacebookAuthProvider
+	} else {
+		authProvider = models.LocalAuthProvider
+	}
+
+	// Try to find existing user by AuthProviderID first (more specific)
+	user, err := s.userRepository.GetUserByAuthProvider(dto.AuthProviderID, authProvider)
+
+	if err != nil {
+		// User doesn't exist by OAuth ID - try by email
+		user, err = s.userRepository.GetUserByEmail(dto.Email)
+
+		if err != nil {
+			// User doesn't exist at all - create new OAuth user
+			logger.Info("Creating new OAuth user for email: ", dto.Email)
+
+			user = &models.User{
+				Email:             dto.Email,
+				Username:          dto.Username,
+				PhoneNumber:       dto.PhoneNumber,
+				Gender:            models.Gender(dto.Gender),
+				Birthday:          dto.Birthday,
+				AuthProvider:      authProvider,
+				AuthProviderID:    dto.AuthProviderID,
+				ProfilePictureURL: dto.ProfilePictureURL,
+				IsEmailVerified:   true, // Firebase already verified
+				Role:              "user",
+				Password:          "", // No password for OAuth users
+			}
+
+			if err := s.userRepository.CreateUser(user); err != nil {
+				logger.Error("Failed to create OAuth user: ", err)
+				return nil, errors.New("failed to create user")
+			}
+		} else {
+			// User exists by email but not OAuth ID - link OAuth account
+			logger.Info("Linking OAuth account for existing user: ", dto.Email)
+
+			user.AuthProvider = authProvider
+			user.AuthProviderID = dto.AuthProviderID
+			if dto.ProfilePictureURL != "" {
+				user.ProfilePictureURL = dto.ProfilePictureURL
+			}
+			user.IsEmailVerified = true
+
+			now := time.Now()
+			user.LastLogin = &now
+
+			if err := s.userRepository.UpdateUser(user); err != nil {
+				logger.Error("Failed to link OAuth account: ", err)
+				return nil, errors.New("failed to update user")
+			}
+		}
+	} else {
+		// User exists by OAuth ID - update info
+		logger.Info("Existing OAuth user found, updating info for: ", dto.Email)
+
+		// Update OAuth fields if they changed
+		if dto.ProfilePictureURL != "" && user.ProfilePictureURL != dto.ProfilePictureURL {
+			user.ProfilePictureURL = dto.ProfilePictureURL
+		}
+		user.IsEmailVerified = true
+
+		// Update last login
+		now := time.Now()
+		user.LastLogin = &now
+
+		if err := s.userRepository.UpdateUser(user); err != nil {
+			logger.Error("Failed to update OAuth user: ", err)
+			return nil, errors.New("failed to update user")
+		}
+	}
+
+	// Generate tokens
+	accessToken, err := s.generateAccessToken(user)
+	if err != nil {
+		logger.Error("Failed to generate access token: ", err)
+		return nil, errors.New("failed to generate access token")
+	}
+
+	refreshToken, err := s.generateRefreshToken(user)
+	if err != nil {
+		logger.Error("Failed to generate refresh token: ", err)
+		return nil, errors.New("failed to generate refresh token")
+	}
+
+	// Store refresh token
+	expirationTime := time.Now().Add(24 * time.Hour)
+	user.RefreshToken = refreshToken
+	user.RefreshTokenExpiredAt = &expirationTime
+	s.userRepository.UpdateUser(user)
+
+	return &models.LoginToken{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
 }

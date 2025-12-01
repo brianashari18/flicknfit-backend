@@ -7,23 +7,26 @@ import (
 
 // Config holds all the application-wide configuration read from environment variables.
 type Config struct {
-	AppPort      string
-	DBUser       string
-	DBPassword   string
-	DBHost       string
-	DBPort       string
-	DBName       string
-	DBSSLMode    string
-	DBCertPath   string
-	DBKeyPath    string
-	DBRootCert   string
-	DBEnableSSL  bool
-	JwtSecretKey string
-	SmtpHost     string
-	SmtpUser     string
-	SmtpPassword string
-	SmtpPort     string
-	AIApiURL     string
+	AppHost                string
+	AppPort                string
+	DBUser                 string
+	DBPassword             string
+	DBHost                 string
+	DBPort                 string
+	DBName                 string
+	DBSSLMode              string
+	DBCertPath             string
+	DBKeyPath              string
+	DBRootCert             string
+	DBEnableSSL            bool
+	JwtSecretKey           string
+	SmtpHost               string
+	SmtpUser               string
+	SmtpPassword           string
+	SmtpPort               string
+	AIApiURL               string
+	FirebaseProjectID      string
+	FirebasePrivateKeyPath string
 }
 
 // LoadConfig reads the configuration from environment variables.
@@ -31,25 +34,31 @@ type Config struct {
 func LoadConfig() (*Config, error) {
 	// Initialize a new Config struct.
 	cfg := &Config{
-		AppPort:      os.Getenv("APP_PORT"),
-		DBUser:       os.Getenv("DB_USER"),
-		DBPassword:   os.Getenv("DB_PASSWORD"),
-		DBHost:       os.Getenv("DB_HOST"),
-		DBPort:       os.Getenv("DB_PORT"),
-		DBName:       os.Getenv("DB_NAME"),
-		DBSSLMode:    os.Getenv("DB_SSL_MODE"),
-		DBCertPath:   os.Getenv("DB_CERT_PATH"),
-		DBKeyPath:    os.Getenv("DB_KEY_PATH"),
-		DBRootCert:   os.Getenv("DB_ROOT_CERT"),
-		JwtSecretKey: os.Getenv("JWT_SECRET_KEY"),
-		SmtpHost:     os.Getenv("SMTP_HOST"),
-		SmtpUser:     os.Getenv("SMTP_USER"),
-		SmtpPassword: os.Getenv("SMTP_PASSWORD"),
-		SmtpPort:     os.Getenv("SMTP_PORT"),
-		AIApiURL:     os.Getenv("AI_API_URL"),
+		AppHost:                os.Getenv("APP_HOST"),
+		AppPort:                os.Getenv("APP_PORT"),
+		DBUser:                 os.Getenv("DB_USER"),
+		DBPassword:             os.Getenv("DB_PASSWORD"),
+		DBHost:                 os.Getenv("DB_HOST"),
+		DBPort:                 os.Getenv("DB_PORT"),
+		DBName:                 os.Getenv("DB_NAME"),
+		DBSSLMode:              os.Getenv("DB_SSL_MODE"),
+		DBCertPath:             os.Getenv("DB_CERT_PATH"),
+		DBKeyPath:              os.Getenv("DB_KEY_PATH"),
+		DBRootCert:             os.Getenv("DB_ROOT_CERT"),
+		JwtSecretKey:           os.Getenv("JWT_SECRET_KEY"),
+		SmtpHost:               os.Getenv("SMTP_HOST"),
+		SmtpUser:               os.Getenv("SMTP_USER"),
+		SmtpPassword:           os.Getenv("SMTP_PASSWORD"),
+		SmtpPort:               os.Getenv("SMTP_PORT"),
+		AIApiURL:               os.Getenv("AI_API_URL"),
+		FirebaseProjectID:      os.Getenv("FIREBASE_PROJECT_ID"),
+		FirebasePrivateKeyPath: os.Getenv("FIREBASE_PRIVATE_KEY_PATH"),
 	}
 
 	// Simple validation to ensure critical variables are set.
+	if cfg.AppHost == "" {
+		return nil, errors.New("APP_HOST environment variable is not set")
+	}
 	if cfg.AppPort == "" {
 		return nil, errors.New("APP_PORT environment variable is not set")
 	}

@@ -223,7 +223,7 @@ func (ctrl *productController) GetProductPublicByID(c *fiber.Ctx) error {
 		return utils.SendResponse(c, http.StatusNotFound, "Product not found", nil)
 	}
 
-	response := dtos.ToProductResponseDTO(product)
+	response := dtos.ToProductPublicResponseDTO(product)
 	return utils.SendResponse(c, http.StatusOK, "Product found", response)
 }
 

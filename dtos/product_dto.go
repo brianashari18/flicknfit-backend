@@ -106,10 +106,30 @@ type ProductPublicResponseDTO struct {
 	Discount     float64          `json:"discount"`
 	Rating       float64          `json:"rating"`
 	Reviewer     int              `json:"reviewer"`
+	Sold         int              `json:"sold"`
 	CreatedAt    time.Time        `json:"created_at"`
 	UpdatedAt    time.Time        `json:"updated_at"`
+	Brand        BrandDTO         `json:"brand"`
 	ProductItems []ProductItemDTO `json:"product_items"`
+	Categories   []string         `json:"categories"`
+	Styles       []string         `json:"styles"`
+	Variations   []VariationDTO   `json:"variations"`
 	Reviews      []ReviewDTO      `json:"reviews"`
+}
+
+// BrandDTO untuk response ringkas brand
+type BrandDTO struct {
+	ID         uint64 `json:"id"`
+	Name       string `json:"name"`
+	LogoURL    string `json:"logo_url"`
+	WebsiteURL string `json:"website_url"`
+}
+
+// VariationDTO untuk response variasi produk
+type VariationDTO struct {
+	ID     uint64   `json:"id"`
+	Name   string   `json:"name"`
+	Values []string `json:"values"`
 }
 
 // AdminProductDetailsDTO mewakili data produk lengkap untuk admin, termasuk item produk, kategori, dan ulasan.
@@ -140,6 +160,62 @@ func ToProductPublicResponseDTO(product *models.Product) ProductPublicResponseDT
 		reviews[i] = ToReviewDTO(&review)
 	}
 
+	// Brand
+	brand := BrandDTO{
+		ID:         product.Brand.ID,
+		Name:       product.Brand.Name,
+		LogoURL:    product.Brand.LogoURL,
+		WebsiteURL: product.Brand.WebsiteURL,
+	}
+
+	// Categories
+	categories := make([]string, len(product.ProductCategories))
+	for i, cat := range product.ProductCategories {
+		categories[i] = cat.Category
+	}
+
+	// Styles
+	styles := make([]string, len(product.ProductStyles))
+	for i, style := range product.ProductStyles {
+		styles[i] = style.Style
+	}
+
+	// Variations (dari ProductItems -> Configurations -> ProductVariationOption -> ProductVariation)
+	variationMap := map[uint64]VariationDTO{}
+	for _, item := range product.ProductItems {
+		for _, conf := range item.Configurations {
+			varOpt := conf.ProductVariationOption
+			varID := varOpt.ProductAttributeID
+			varName := ""
+			if varOpt.ProductVariation.ID != 0 {
+				varName = varOpt.ProductVariation.Name
+			}
+			if varName == "" {
+				continue
+			}
+			v, ok := variationMap[varID]
+			if !ok {
+				v = VariationDTO{ID: varID, Name: varName, Values: []string{}}
+			}
+			// Hindari duplikat value
+			found := false
+			for _, val := range v.Values {
+				if val == varOpt.Value {
+					found = true
+					break
+				}
+			}
+			if !found {
+				v.Values = append(v.Values, varOpt.Value)
+			}
+			variationMap[varID] = v
+		}
+	}
+	variations := make([]VariationDTO, 0, len(variationMap))
+	for _, v := range variationMap {
+		variations = append(variations, v)
+	}
+
 	return ProductPublicResponseDTO{
 		ID:           product.ID,
 		BrandID:      product.BrandID,
@@ -148,9 +224,14 @@ func ToProductPublicResponseDTO(product *models.Product) ProductPublicResponseDT
 		Discount:     product.Discount,
 		Rating:       product.Rating,
 		Reviewer:     product.Reviewer,
+		Sold:         product.Sold,
 		CreatedAt:    product.CreatedAt,
 		UpdatedAt:    product.UpdatedAt,
+		Brand:        brand,
 		ProductItems: productItems,
+		Categories:   categories,
+		Styles:       styles,
+		Variations:   variations,
 		Reviews:      reviews,
 	}
 }
@@ -216,12 +297,20 @@ type AdminReviewResponseDTO struct {
 
 // ProductItemDTO represents a product item.
 type ProductItemDTO struct {
-	ID        uint64 `json:"id"`
-	ProductID uint64 `json:"product_id"`
-	SKU       string `json:"sku"`
-	Price     int    `json:"price"`
-	Stock     int    `json:"stock"`
-	PhotoURL  string `json:"photo_url"`
+	ID             uint64                 `json:"id"`
+	ProductID      uint64                 `json:"product_id"`
+	SKU            string                 `json:"sku"`
+	Price          int                    `json:"price"`
+	Stock          int                    `json:"stock"`
+	Sold           int                    `json:"sold"`
+	PhotoURL       string                 `json:"photo_url"`
+	Configurations []ItemConfigurationDTO `json:"configurations"`
+}
+
+// ItemConfigurationDTO menampilkan kombinasi varian pada ProductItem
+type ItemConfigurationDTO struct {
+	Variation string `json:"variation"`
+	Value     string `json:"value"`
 }
 
 func ToAdminReviewResponseDTO(review models.Review) AdminReviewResponseDTO {
@@ -242,13 +331,26 @@ func ToAdminReviewResponseDTOs(reviews []*models.Review) []AdminReviewResponseDT
 }
 
 func ToProductItemDTO(item models.ProductItem) ProductItemDTO {
+	configs := make([]ItemConfigurationDTO, 0, len(item.Configurations))
+	for _, conf := range item.Configurations {
+		varName := ""
+		if conf.ProductVariationOption.ProductVariation.ID != 0 {
+			varName = conf.ProductVariationOption.ProductVariation.Name
+		}
+		configs = append(configs, ItemConfigurationDTO{
+			Variation: varName,
+			Value:     conf.ProductVariationOption.Value,
+		})
+	}
 	return ProductItemDTO{
-		ID:        item.ID,
-		ProductID: item.ProductID,
-		SKU:       item.SKU,
-		Price:     item.Price,
-		Stock:     item.Stock,
-		PhotoURL:  item.PhotoURL,
+		ID:             item.ID,
+		ProductID:      item.ProductID,
+		SKU:            item.SKU,
+		Price:          item.Price,
+		Stock:          item.Stock,
+		Sold:           item.Sold,
+		PhotoURL:       item.PhotoURL,
+		Configurations: configs,
 	}
 }
 

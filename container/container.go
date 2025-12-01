@@ -42,6 +42,7 @@ type Services struct {
 	Review       services.ReviewService
 	Wardrobe     services.WardrobeService
 	AI           services.AIService
+	Firebase     *services.FirebaseService
 }
 
 // Controllers holds all controller instances
@@ -54,6 +55,8 @@ type Controllers struct {
 	Review       controllers.ReviewController
 	Wardrobe     controllers.WardrobeController
 	AI           controllers.AIController
+	Dashboard    controllers.DashboardController
+	OAuth        *controllers.OAuthController
 }
 
 // NewContainer creates and initializes a new container with all dependencies
@@ -92,6 +95,13 @@ func (c *Container) initRepositories() {
 
 // initServices initializes all service instances
 func (c *Container) initServices() {
+	// Initialize Firebase service
+	firebaseService, err := services.NewFirebaseService(c.Config)
+	if err != nil {
+		utils.GetLogger().Warn("Firebase service initialization failed: ", err)
+		// Continue without Firebase - it's optional
+	}
+
 	c.Services = &Services{
 		User:         services.NewUserService(c.Repositories.User, c.Config),
 		Brand:        services.NewBrandService(c.Repositories.Brand),
@@ -101,6 +111,7 @@ func (c *Container) initServices() {
 		Review:       services.NewReviewService(c.Repositories.Review, c.Repositories.Product),
 		Wardrobe:     services.NewWardrobeService(c.Repositories.Wardrobe),
 		AI:           services.NewAIService(c.Config),
+		Firebase:     firebaseService,
 	}
 }
 
@@ -115,5 +126,7 @@ func (c *Container) initControllers() {
 		Review:       controllers.NewReviewController(c.Services.Review, c.Validator),
 		Wardrobe:     controllers.NewWardrobeController(c.Services.Wardrobe, c.Validator),
 		AI:           controllers.NewAIController(c.Services.AI),
+		Dashboard:    controllers.NewDashboardController(c.DB, c.Services.User, c.Services.Brand),
+		OAuth:        controllers.NewOAuthController(c.Services.User, c.Services.Firebase),
 	}
 }

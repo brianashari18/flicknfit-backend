@@ -41,7 +41,7 @@ func (suite *FavoriteIntegrationTestSuite) SetupSuite() {
 	cfg := &config.Config{
 		JwtSecretKey: "test-secret",
 		AppPort:      "8080",
-		DBHost:       "localhost",
+		DBHost:       "192.168.2.41",
 		DBPort:       "3306",
 		DBUser:       "test",
 		DBPassword:   "test",
@@ -94,7 +94,7 @@ func (suite *FavoriteIntegrationTestSuite) createTestUserAndGetToken() {
 
 	// Login to get token
 	loginDTO := dtos.UserLoginRequestDTO{
-		Email:    "test@example.com",
+		Username: "testuser",
 		Password: "TestPassword123!",
 	}
 

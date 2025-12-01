@@ -190,6 +190,49 @@ definitions:
     required:
     - email
     type: object
+  dtos.ItemConfigurationDTO:
+    properties:
+      value:
+        type: string
+      variation:
+        type: string
+    type: object
+  dtos.OAuthLoginRequestDTO:
+    properties:
+      auth_provider:
+        description: google or facebook
+        enum:
+        - google
+        - facebook
+        type: string
+      auth_provider_id:
+        description: Google/Facebook user ID
+        type: string
+      birthday:
+        type: string
+      email:
+        type: string
+      firebase_token:
+        type: string
+      gender:
+        enum:
+        - male
+        - female
+        - other
+        type: string
+      phone_number:
+        type: string
+      profile_picture_url:
+        type: string
+      username:
+        type: string
+    required:
+    - auth_provider
+    - auth_provider_id
+    - email
+    - firebase_token
+    - username
+    type: object
   dtos.PaginationDTO:
     properties:
       limit:
@@ -216,6 +259,10 @@ definitions:
     type: object
   dtos.ProductItemDTO:
     properties:
+      configurations:
+        items:
+          $ref: '#/definitions/dtos.ItemConfigurationDTO'
+        type: array
       id:
         type: integer
       photo_url:
@@ -493,13 +540,15 @@ definitions:
     type: object
   dtos.UserLoginRequestDTO:
     properties:
-      email:
-        type: string
       password:
         type: string
+      username:
+        maxLength: 30
+        minLength: 3
+        type: string
     required:
-    - email
     - password
+    - username
     type: object
   dtos.UserLoginResponseDTO:
     properties:
@@ -633,7 +682,7 @@ definitions:
       status:
         type: string
     type: object
-host: localhost:8000
+host: 192.168.2.41:8000
 info:
   contact:
     email: support@flicknfit.com
@@ -789,6 +838,106 @@ paths:
       summary: Update brand (Admin only)
       tags:
       - Admin - Brand Management
+  /admin/dashboard/product-analytics:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed product analytics for admin dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product analytics retrieved successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get product analytics
+      tags:
+      - Dashboard
+  /admin/dashboard/revenue-analytics:
+    get:
+      consumes:
+      - application/json
+      description: Get revenue analytics for admin dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Revenue analytics retrieved successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get revenue analytics
+      tags:
+      - Dashboard
+  /admin/dashboard/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get overview statistics for admin dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard statistics retrieved successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get dashboard statistics
+      tags:
+      - Dashboard
+  /admin/dashboard/user-analytics:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed user analytics for admin dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User analytics retrieved successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user analytics
+      tags:
+      - Dashboard
   /admin/products:
     get:
       consumes:
@@ -1333,6 +1482,45 @@ paths:
       summary: Scan woman's body measurements
       tags:
       - AI Predictions
+  /auth/facebook:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with Facebook account via Firebase
+      parameters:
+      - description: Facebook login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.OAuthLoginRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.UserLoginResponseDTO'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Facebook OAuth login
+      tags:
+      - Auth
   /auth/forgot-password:
     post:
       consumes:
@@ -1367,6 +1555,45 @@ paths:
       summary: Forgot password
       tags:
       - Authentication
+  /auth/google:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with Google account via Firebase
+      parameters:
+      - description: Google login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.OAuthLoginRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.UserLoginResponseDTO'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Google OAuth login
+      tags:
+      - Auth
   /auth/login:
     post:
       consumes:
@@ -1375,7 +1602,7 @@ paths:
       parameters:
       - description: Login credentials
         in: body
-        name: credentials
+        name: request
         required: true
         schema:
           $ref: '#/definitions/dtos.UserLoginRequestDTO'
@@ -1406,32 +1633,7 @@ paths:
       summary: User login
       tags:
       - Authentication
-  /auth/logout:
-    post:
-      consumes:
-      - application/json
-      description: Logout user by invalidating refresh token
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Logout successful
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/utils.Response'
-      security:
-      - BearerAuth: []
-      summary: User logout
-      tags:
-      - Authentication
-  /auth/refresh:
+  /auth/refresh-token:
     post:
       consumes:
       - application/json
@@ -1666,7 +1868,6 @@ paths:
       summary: Get user's shopping cart
       tags:
       - Shopping Cart
-  /cart/items:
     post:
       consumes:
       - application/json
@@ -1707,7 +1908,7 @@ paths:
       summary: Add product to cart
       tags:
       - Shopping Cart
-  /cart/items/{itemId}:
+  /cart/{itemId}:
     delete:
       consumes:
       - application/json
@@ -1828,6 +2029,45 @@ paths:
       summary: Get user's favorite products
       tags:
       - Favorites
+  /favorites/{productId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a product item from user's favorite list
+      parameters:
+      - description: Product Item ID to remove from favorites
+        in: path
+        name: productId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Removed from favorites successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid product item ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Product not in favorites
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove product from favorites
+      tags:
+      - Favorites
     post:
       consumes:
       - application/json
@@ -1869,45 +2109,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Add product to favorites
-      tags:
-      - Favorites
-  /favorites/{productId}:
-    delete:
-      consumes:
-      - application/json
-      description: Remove a product item from user's favorite list
-      parameters:
-      - description: Product Item ID to remove from favorites
-        in: path
-        name: productId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Removed from favorites successfully
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "400":
-          description: Invalid product item ID
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "404":
-          description: Product not in favorites
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/utils.Response'
-      security:
-      - BearerAuth: []
-      summary: Remove product from favorites
       tags:
       - Favorites
   /products:
@@ -2013,54 +2214,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Create product review
-      tags:
-      - Reviews
-  /products/{productId}/reviews:
-    get:
-      consumes:
-      - application/json
-      description: Get paginated reviews for a specific product
-      parameters:
-      - description: Product ID
-        in: path
-        name: productId
-        required: true
-        type: integer
-      - default: 1
-        description: Page number
-        in: query
-        name: page
-        type: integer
-      - default: 10
-        description: Items per page
-        in: query
-        name: limit
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Reviews retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/utils.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/dtos.ReviewListResponseDTO'
-              type: object
-        "400":
-          description: Invalid product ID
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "404":
-          description: Product not found
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/utils.Response'
-      summary: Get product reviews
       tags:
       - Reviews
   /products/{productId}/reviews-list:
@@ -2239,41 +2392,56 @@ paths:
       summary: Create a product review
       tags:
       - Reviews
-  /user/profile:
+  /reviews/product/{productId}:
     get:
       consumes:
       - application/json
-      description: Get current authenticated user's profile information
+      description: Get paginated reviews for a specific product
+      parameters:
+      - description: Product ID
+        in: path
+        name: productId
+        required: true
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: User retrieved successfully
+          description: Reviews retrieved successfully
           schema:
             allOf:
             - $ref: '#/definitions/utils.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/dtos.UserResponseDTO'
+                  $ref: '#/definitions/dtos.ReviewListResponseDTO'
               type: object
-        "401":
-          description: Unauthorized
+        "400":
+          description: Invalid product ID
           schema:
             $ref: '#/definitions/utils.Response'
         "404":
-          description: User not found
+          description: Product not found
           schema:
             $ref: '#/definitions/utils.Response'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/utils.Response'
-      security:
-      - BearerAuth: []
-      summary: Get current user profile
+      summary: Get product reviews
       tags:
-      - User Profile
-    put:
+      - Reviews
+  /users/edit-profile:
+    patch:
       consumes:
       - application/json
       description: Update current user's profile information
@@ -2311,6 +2479,65 @@ paths:
       security:
       - BearerAuth: []
       summary: Edit user profile
+      tags:
+      - User Profile
+  /users/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout user by invalidating refresh token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout successful
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: User logout
+      tags:
+      - Authentication
+  /users/me:
+    get:
+      consumes:
+      - application/json
+      description: Get current authenticated user's profile information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.UserResponseDTO'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get current user profile
       tags:
       - User Profile
   /wardrobe:

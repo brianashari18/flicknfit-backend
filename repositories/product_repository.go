@@ -84,7 +84,10 @@ func (r *productRepository) GetAllProducts() ([]*models.Product, error) {
 func (r *productRepository) GetProductPublicByID(id uint64) (*models.Product, error) {
 	var product models.Product
 	if err := r.DB.
-		Preload("ProductItems.Configurations.ProductVariationOption").
+		Preload("Brand").
+		Preload("ProductCategories").
+		Preload("ProductStyles").
+		Preload("ProductItems.Configurations.ProductVariationOption.ProductVariation").
 		Preload("Reviews").
 		First(&product, id).Error; err != nil {
 		return nil, err
@@ -96,7 +99,10 @@ func (r *productRepository) GetProductPublicByID(id uint64) (*models.Product, er
 func (r *productRepository) GetAllProductsPublic() ([]*models.Product, error) {
 	var products []*models.Product
 	if err := r.DB.
-		Preload("ProductItems.Configurations.ProductVariationOption").
+		Preload("Brand").
+		Preload("ProductCategories").
+		Preload("ProductStyles").
+		Preload("ProductItems.Configurations.ProductVariationOption.ProductVariation").
 		Preload("Reviews").
 		Find(&products).Error; err != nil {
 		return nil, err

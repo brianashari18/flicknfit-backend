@@ -29,7 +29,7 @@ func NewTestConfig() *TestConfig {
 
 	// Create test config
 	cfg := &config.Config{
-		DBHost:       "localhost",
+		DBHost:       "192.168.2.41",
 		DBPort:       "3306",
 		DBUser:       "test",
 		DBPassword:   "test",

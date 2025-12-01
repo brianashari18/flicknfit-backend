@@ -72,7 +72,7 @@ func (ctrl *favoriteController) GetUserFavorites(c *fiber.Ctx) error {
 // @Failure 404 {object} utils.Response "Product item not found"
 // @Failure 409 {object} utils.Response "Product already in favorites"
 // @Failure 500 {object} utils.Response "Internal server error"
-// @Router /favorites [post]
+// @Router /favorites/{productId} [post]
 func (ctrl *favoriteController) AddFavorite(c *fiber.Ctx) error {
 	var dto dtos.AddFavoriteDTO
 	if err := utils.StrictBodyParser(c, &dto); err != nil {

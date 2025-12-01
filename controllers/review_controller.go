@@ -48,7 +48,7 @@ func NewReviewController(service services.ReviewService, validator *validator.Va
 // @Failure 400 {object} utils.Response "Invalid product ID"
 // @Failure 404 {object} utils.Response "Product not found"
 // @Failure 500 {object} utils.Response "Internal server error"
-// @Router /products/{productId}/reviews [get]
+// @Router /reviews/product/{productId} [get]
 func (ctrl *reviewController) GetProductReviews(c *fiber.Ctx) error {
 	productID, err := utils.GetUintParam(c, "productId")
 	if err != nil {

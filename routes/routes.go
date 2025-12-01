@@ -46,30 +46,35 @@ func setupAPIRoutes(app *fiber.App, container *container.Container) {
 	setupFavoriteRoutes(api, container)
 	setupReviewRoutes(api, container)
 	setupWardrobeRoutes(api, container)
-
 	// Setup AI prediction routes
 	setupAIRoutes(api, container)
+
+	// Setup OAuth routes
+	setupOAuthRoutes(api, container)
+
+	// Setup dashboard routes
+	setupDashboardRoutes(api, container)
 }
 
 // setupUserRoutes configures all user-related routes
 func setupUserRoutes(api fiber.Router, c *container.Container) {
-	// Public user routes with auth rate limiting
+	// Authentication routes (public with rate limiting)
+	authRoutes := api.Group("/auth")
+	middlewares.SetupAuthMiddlewares(authRoutes)
+
+	authRoutes.Post("/register", c.Controllers.User.RegisterUser)
+	authRoutes.Post("/login", c.Controllers.User.LoginUser)
+	authRoutes.Post("/forgot-password", c.Controllers.User.ForgotPassword)
+	authRoutes.Post("/verify-otp", c.Controllers.User.VerifyOTP)
+	authRoutes.Post("/reset-password", c.Controllers.User.ResetPassword)
+	authRoutes.Post("/refresh-token", c.Controllers.User.RefreshToken)
+
+	// User management routes (requires authentication)
 	userRoutes := api.Group("/users")
-	middlewares.SetupAuthMiddlewares(userRoutes)
-
-	userRoutes.Post("/register", c.Controllers.User.RegisterUser)
-	userRoutes.Post("/login", c.Controllers.User.LoginUser)
-	userRoutes.Post("/forgot-password", c.Controllers.User.ForgotPassword)
-	userRoutes.Post("/verify-otp", c.Controllers.User.VerifyOTP)
-	userRoutes.Post("/reset-password", c.Controllers.User.ResetPassword)
-	userRoutes.Post("/refresh-token", c.Controllers.User.RefreshToken)
-
-	// Private user routes (requires authentication)
-	privateRoutes := api.Group("/users")
-	privateRoutes.Use(middlewares.AuthMiddleware())
-	privateRoutes.Post("/logout", c.Controllers.User.LogoutUser)
-	privateRoutes.Get("/me", c.Controllers.User.GetUserByAccessToken)
-	privateRoutes.Patch("/edit-profile", c.Controllers.User.EditProfile)
+	userRoutes.Use(middlewares.AuthMiddleware())
+	userRoutes.Post("/logout", c.Controllers.User.LogoutUser)
+	userRoutes.Get("/me", c.Controllers.User.GetUserByAccessToken)
+	userRoutes.Patch("/edit-profile", c.Controllers.User.EditProfile)
 
 	// Admin user routes (requires authentication + admin role)
 	userAdminRoutes := api.Group("/admin/users")
@@ -175,4 +180,28 @@ func setupAIRoutes(api fiber.Router, c *container.Container) {
 	predictionRoutes.Post("/skin-color-tone", c.Controllers.AI.PredictSkinColorTone)
 	predictionRoutes.Post("/woman-body-scan", c.Controllers.AI.PredictWomanBodyScan)
 	predictionRoutes.Post("/men-body-scan", c.Controllers.AI.PredictMenBodyScan)
+}
+
+// setupOAuthRoutes sets up OAuth authentication routes
+func setupOAuthRoutes(app fiber.Router, c *container.Container) {
+	// OAuth routes (public - no auth required)
+	oauthRoutes := app.Group("/auth")
+
+	// Google OAuth login
+	oauthRoutes.Post("/google", c.Controllers.OAuth.GoogleLogin)
+
+	// Facebook OAuth login
+	oauthRoutes.Post("/facebook", c.Controllers.OAuth.FacebookLogin)
+}
+
+// setupDashboardRoutes sets up admin dashboard routes
+func setupDashboardRoutes(app fiber.Router, c *container.Container) {
+	// Admin dashboard API routes (public for demo purposes)
+	dashboardRoutes := app.Group("/admin/dashboard")
+	// dashboardRoutes.Use(middlewares.AuthMiddleware()) // Commented out for demo - enable for production
+
+	dashboardRoutes.Get("/stats", c.Controllers.Dashboard.GetDashboardStats)
+	dashboardRoutes.Get("/user-analytics", c.Controllers.Dashboard.GetUserAnalytics)
+	dashboardRoutes.Get("/product-analytics", c.Controllers.Dashboard.GetProductAnalytics)
+	dashboardRoutes.Get("/revenue-analytics", c.Controllers.Dashboard.GetRevenueAnalytics)
 }
