@@ -27,6 +27,12 @@ type Config struct {
 	AIApiURL               string
 	FirebaseProjectID      string
 	FirebasePrivateKeyPath string
+	GroqAPIKey             string
+	GroqModel              string
+	GeminiAPIKey           string
+	GeminiModel            string
+	TelkomLLMAPIKey        string
+	TelkomModel            string
 }
 
 // LoadConfig reads the configuration from environment variables.
@@ -53,6 +59,12 @@ func LoadConfig() (*Config, error) {
 		AIApiURL:               os.Getenv("AI_API_URL"),
 		FirebaseProjectID:      os.Getenv("FIREBASE_PROJECT_ID"),
 		FirebasePrivateKeyPath: os.Getenv("FIREBASE_PRIVATE_KEY_PATH"),
+		GroqAPIKey:             os.Getenv("GROQ_API_KEY"),
+		GroqModel:              os.Getenv("GROQ_MODEL"),
+		GeminiAPIKey:           os.Getenv("GEMINI_API_KEY"),
+		GeminiModel:            os.Getenv("GEMINI_MODEL"),
+		TelkomLLMAPIKey:        os.Getenv("TELKOM_LLM_API_KEY"),
+		TelkomModel:            os.Getenv("TELKOM_MODEL"),
 	}
 
 	// Simple validation to ensure critical variables are set.

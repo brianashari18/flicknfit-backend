@@ -62,6 +62,7 @@ func Migrate(db *gorm.DB, logger *logrus.Logger) {
 		&models.Brand{},
 		&models.Product{},
 		&models.ProductCategory{},
+		&models.ProductStyle{},
 		&models.ProductItem{},
 		&models.ProductVariation{},
 		&models.ProductVariationOption{},

@@ -24,6 +24,7 @@ type AIService interface {
 type aiService struct {
 	config     *config.Config
 	httpClient *http.Client
+	llmChain   *LLMChain
 }
 
 // NewAIService creates a new AI service instance
@@ -34,11 +35,54 @@ func NewAIService(cfg *config.Config) AIService {
 	if cfg.AIApiURL == "" {
 		panic("AI_API_URL is required but not set in config")
 	}
+
+	// Initialize LLM providers in priority order: Groq -> Gemini -> Telkom
+	var providers []LLMProvider
+
+	// Add Groq if configured
+	if cfg.GroqAPIKey != "" {
+		model := cfg.GroqModel
+		if model == "" {
+			model = "llama-3.3-70b-versatile" // Default Groq model
+		}
+		providers = append(providers, NewGroqProvider(cfg.GroqAPIKey, model))
+		log.Printf("[AIService] Groq provider initialized with model: %s", model)
+	}
+
+	// Add Gemini if configured
+	if cfg.GeminiAPIKey != "" {
+		model := cfg.GeminiModel
+		if model == "" {
+			model = "gemini-2.0-flash-exp" // Default Gemini model
+		}
+		providers = append(providers, NewGeminiProvider(cfg.GeminiAPIKey, model))
+		log.Printf("[AIService] Gemini provider initialized with model: %s", model)
+	}
+
+	// Add Telkom if configured
+	if cfg.TelkomLLMAPIKey != "" {
+		model := cfg.TelkomModel
+		if model == "" {
+			model = "Qwen2.5-Coder-32B-Instruct" // Default Telkom model
+		}
+		providers = append(providers, NewTelkomProvider(cfg.TelkomLLMAPIKey, model))
+		log.Printf("[AIService] Telkom provider initialized with model: %s", model)
+	}
+
+	var llmChain *LLMChain
+	if len(providers) > 0 {
+		llmChain = NewLLMChain(providers...)
+		log.Printf("[AIService] LLM chain initialized with %d providers", len(providers))
+	} else {
+		log.Printf("[AIService] WARNING: No LLM providers configured, recommendations will be disabled")
+	}
+
 	return &aiService{
 		config: cfg,
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
+		llmChain: llmChain,
 	}
 }
 
@@ -97,6 +141,20 @@ func (s *aiService) PredictSkinColorTone(file multipart.File, filename string) (
 	}
 
 	log.Printf("DEBUG: AI Service success - Result: %+v", result)
+
+	// Enrich with LLM color recommendations if available
+	if s.llmChain != nil && result.SkinTone != "" {
+		log.Printf("DEBUG: Getting color recommendations for skin tone: %s", result.SkinTone)
+		colors, err := s.llmChain.GenerateColorRecommendations(result.SkinTone)
+		if err != nil {
+			log.Printf("WARNING: Failed to get color recommendations: %v", err)
+			// Don't fail the whole request, just skip recommendations
+		} else {
+			result.ColorRecommendations = colors
+			log.Printf("DEBUG: Added %d color recommendations", len(colors))
+		}
+	}
+
 	return &result, nil
 }
 
@@ -124,6 +182,19 @@ func (s *aiService) PredictWomanBodyScan(file multipart.File, filename string) (
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
+	// Enrich with LLM style recommendations if available
+	if s.llmChain != nil && result.PredictedClass != "" {
+		log.Printf("DEBUG: Getting style recommendations for body type: %s", result.PredictedClass)
+		styles, err := s.llmChain.GenerateStyleRecommendations(result.PredictedClass)
+		if err != nil {
+			log.Printf("WARNING: Failed to get style recommendations: %v", err)
+			// Don't fail the whole request, just skip recommendations
+		} else {
+			result.StyleRecommendations = styles
+			log.Printf("DEBUG: Added %d style recommendations", len(styles))
+		}
+	}
+
 	return &result, nil
 }
 
@@ -149,6 +220,19 @@ func (s *aiService) PredictMenBodyScan(file multipart.File, filename string) (*d
 	var result dtos.MenBodyScanPredictionResponseDTO
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	// Enrich with LLM style recommendations if available
+	if s.llmChain != nil && result.PredictedClass != "" {
+		log.Printf("DEBUG: Getting style recommendations for body type: %s", result.PredictedClass)
+		styles, err := s.llmChain.GenerateStyleRecommendations(result.PredictedClass)
+		if err != nil {
+			log.Printf("WARNING: Failed to get style recommendations: %v", err)
+			// Don't fail the whole request, just skip recommendations
+		} else {
+			result.StyleRecommendations = styles
+			log.Printf("DEBUG: Added %d style recommendations", len(styles))
+		}
 	}
 
 	return &result, nil
