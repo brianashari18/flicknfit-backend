@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type ShoppingCart struct {
+type SavedItems struct {
 	gorm.Model
 	ID        uint64    `gorm:"primaryKey;autoIncrement" json:"id"`
 	UserID    uint64    `gorm:"not null" json:"user_id"`
@@ -14,6 +14,10 @@ type ShoppingCart struct {
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 
 	// Relationships
-	User              User               `gorm:"foreignKey:UserID"`
-	ShoppingCartItems []ShoppingCartItem `gorm:"foreignKey:ShoppingCartID"`
+	User           User             `gorm:"foreignKey:UserID"`
+	SavedItemsList []SavedItemsList `gorm:"foreignKey:SavedItemsID"`
+}
+
+func (SavedItems) TableName() string {
+	return "saved_items"
 }

@@ -36,7 +36,7 @@ type User struct {
 	UpdatedAt             time.Time    `gorm:"autoUpdateTime" json:"updated_at"`
 
 	// Relationships
-	ShoppingCart      []ShoppingCart    `gorm:"foreignKey:UserID" json:"-"`
+	SavedItems        []SavedItems      `gorm:"foreignKey:UserID" json:"-"`
 	Favorites         []Favorite        `gorm:"foreignKey:UserID" json:"-"`
 	UserWardrobes     []UserWardrobe    `gorm:"foreignKey:UserID" json:"-"`
 	BodyScanHistories []BodyScanHistory `gorm:"foreignKey:UserID" json:"-"`

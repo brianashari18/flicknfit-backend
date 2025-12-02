@@ -13,8 +13,8 @@ type ProductItem struct {
 	PhotoURL  string `gorm:"size:255" json:"photo_url"`
 
 	// Relationships
-	Product           Product                `gorm:"foreignKey:ProductID"`
-	ShoppingCartItems []ShoppingCartItem     `gorm:"foreignKey:ProductItemID"`
-	Favorites         []Favorite             `gorm:"foreignKey:ProductItemID"`
-	Configurations    []ProductConfiguration `gorm:"foreignKey:ProductItemID"`
+	Product        Product                `gorm:"foreignKey:ProductID"`
+	SavedItemsList []SavedItemsList       `gorm:"foreignKey:ProductItemID"`
+	Favorites      []Favorite             `gorm:"foreignKey:ProductItemID"`
+	Configurations []ProductConfiguration `gorm:"foreignKey:ProductItemID"`
 }

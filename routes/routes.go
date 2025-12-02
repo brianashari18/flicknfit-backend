@@ -40,8 +40,8 @@ func setupAPIRoutes(app *fiber.App, container *container.Container) {
 	// Setup brand routes
 	setupBrandRoutes(api, container)
 
-	// Setup shopping cart routes
-	setupShoppingCartRoutes(api, container)
+	// Setup saved items routes
+	setupsavedItemsRoutes(api, container)
 	// Setup new feature routes
 	setupFavoriteRoutes(api, container)
 	setupReviewRoutes(api, container)
@@ -51,6 +51,9 @@ func setupAPIRoutes(app *fiber.App, container *container.Container) {
 
 	// Setup scan history routes
 	setupScanHistoryRoutes(api, container)
+
+	// Setup tracking routes
+	setupTrackingRoutes(api, container)
 
 	// Setup OAuth routes
 	setupOAuthRoutes(api, container)
@@ -123,15 +126,15 @@ func setupBrandRoutes(api fiber.Router, c *container.Container) {
 	brandAdminRoutes.Delete("/:id", c.Controllers.Brand.AdminDeleteBrand)
 }
 
-// setupShoppingCartRoutes configures all shopping cart routes
-func setupShoppingCartRoutes(api fiber.Router, c *container.Container) {
-	// All cart routes require authentication
-	shoppingCartRoutes := api.Group("/cart")
-	shoppingCartRoutes.Use(middlewares.AuthMiddleware())
-	shoppingCartRoutes.Get("/", c.Controllers.ShoppingCart.GetUserCart)
-	shoppingCartRoutes.Post("/", c.Controllers.ShoppingCart.AddProductItemToCart)
-	shoppingCartRoutes.Put("/:itemId", c.Controllers.ShoppingCart.UpdateProductItemInCart)
-	shoppingCartRoutes.Delete("/:itemId", c.Controllers.ShoppingCart.RemoveProductItemFromCart)
+// setupsavedItemsRoutes configures all saved items routes
+func setupsavedItemsRoutes(api fiber.Router, c *container.Container) {
+	// All saved-items routes require authentication
+	savedItemsRoutes := api.Group("/savedItems")
+	savedItemsRoutes.Use(middlewares.AuthMiddleware())
+	savedItemsRoutes.Get("/", c.Controllers.SavedItems.GetUserSavedItems)
+	savedItemsRoutes.Post("/", c.Controllers.SavedItems.AddProductItemToSavedItems)
+	savedItemsRoutes.Put("/:itemId", c.Controllers.SavedItems.UpdateProductItemInSavedItems)
+	savedItemsRoutes.Delete("/:itemId", c.Controllers.SavedItems.RemoveProductItemFromSavedItems)
 }
 
 // setupFavoriteRoutes configures all favorite-related routes
@@ -201,6 +204,16 @@ func setupScanHistoryRoutes(api fiber.Router, c *container.Container) {
 
 	// Decrypt and serve scan image
 	historyRoutes.Get("/image", c.Controllers.ScanHistory.GetScanImage)
+}
+
+// setupTrackingRoutes configures product click tracking routes
+func setupTrackingRoutes(api fiber.Router, c *container.Container) {
+	// Tracking routes - public (no auth required for click tracking)
+	// This allows anonymous users to click and be tracked
+	trackingRoutes := api.Group("/track")
+
+	// Click tracking with redirect
+	trackingRoutes.Get("/click/product/:id", c.Controllers.Tracking.TrackProductClick)
 }
 
 // setupOAuthRoutes sets up OAuth authentication routes

@@ -26,12 +26,13 @@ type Repositories struct {
 	User            repositories.UserRepository
 	Brand           repositories.BrandRepository
 	Product         repositories.ProductRepository
-	ShoppingCart    repositories.ShoppingCartRepository
+	SavedItems      repositories.SavedItemsRepository
 	Favorite        repositories.FavoriteRepository
 	Review          repositories.ReviewRepository
 	Wardrobe        repositories.WardrobeRepository
 	FaceScanHistory repositories.FaceScanHistoryRepository
 	BodyScanHistory repositories.BodyScanHistoryRepository
+	ProductClick    repositories.ProductClickRepository
 }
 
 // Services holds all service instances
@@ -39,7 +40,7 @@ type Services struct {
 	User            services.UserService
 	Brand           services.BrandService
 	Product         services.ProductService
-	ShoppingCart    services.ShoppingCartService
+	SavedItems      services.SavedItemsService
 	Favorite        services.FavoriteService
 	Review          services.ReviewService
 	Wardrobe        services.WardrobeService
@@ -47,21 +48,23 @@ type Services struct {
 	Firebase        *services.FirebaseService
 	ScanHistory     services.ScanHistoryService
 	SupabaseStorage services.SupabaseStorageService
+	Tracking        services.TrackingService
 }
 
 // Controllers holds all controller instances
 type Controllers struct {
-	User         controllers.UserController
-	Brand        controllers.BrandController
-	Product      controllers.ProductController
-	ShoppingCart controllers.ShoppingCartController
-	Favorite     controllers.FavoriteController
-	Review       controllers.ReviewController
-	Wardrobe     controllers.WardrobeController
-	AI           controllers.AIController
-	Dashboard    controllers.DashboardController
-	OAuth        *controllers.OAuthController
-	ScanHistory  controllers.ScanHistoryController
+	User        controllers.UserController
+	Brand       controllers.BrandController
+	Product     controllers.ProductController
+	SavedItems  controllers.SavedItemsController
+	Favorite    controllers.FavoriteController
+	Review      controllers.ReviewController
+	Wardrobe    controllers.WardrobeController
+	AI          controllers.AIController
+	Dashboard   controllers.DashboardController
+	OAuth       *controllers.OAuthController
+	ScanHistory controllers.ScanHistoryController
+	Tracking    controllers.TrackingController
 }
 
 // NewContainer creates and initializes a new container with all dependencies
@@ -91,12 +94,13 @@ func (c *Container) initRepositories() {
 		User:            repositories.NewUserRepository(c.DB),
 		Brand:           repositories.NewBrandRepository(c.DB),
 		Product:         repositories.NewProductRepository(c.DB),
-		ShoppingCart:    repositories.NewShoppingCartRepository(c.DB),
+		SavedItems:      repositories.NewSavedItemsRepository(c.DB),
 		Favorite:        repositories.NewFavoriteRepository(c.DB),
 		Review:          repositories.NewReviewRepository(c.DB),
 		Wardrobe:        repositories.NewWardrobeRepository(c.DB),
 		FaceScanHistory: repositories.NewFaceScanHistoryRepository(c.DB),
 		BodyScanHistory: repositories.NewBodyScanHistoryRepository(c.DB),
+		ProductClick:    repositories.NewProductClickRepository(c.DB),
 	}
 }
 
@@ -122,7 +126,7 @@ func (c *Container) initServices() {
 		User:            services.NewUserService(c.Repositories.User, c.Config),
 		Brand:           services.NewBrandService(c.Repositories.Brand),
 		Product:         services.NewProductService(c.Repositories.Product),
-		ShoppingCart:    services.NewShoppingCartService(c.Repositories.ShoppingCart, c.Repositories.Product),
+		SavedItems:      services.NewSavedItemsService(c.Repositories.SavedItems, c.Repositories.Product),
 		Favorite:        services.NewFavoriteService(c.Repositories.Favorite, c.Repositories.Product),
 		Review:          services.NewReviewService(c.Repositories.Review, c.Repositories.Product),
 		Wardrobe:        services.NewWardrobeService(c.Repositories.Wardrobe),
@@ -130,22 +134,24 @@ func (c *Container) initServices() {
 		Firebase:        firebaseService,
 		SupabaseStorage: supabaseStorageService,
 		ScanHistory:     services.NewScanHistoryService(c.Repositories.FaceScanHistory, c.Repositories.BodyScanHistory, supabaseStorageService),
+		Tracking:        services.NewTrackingService(c.Repositories.ProductClick, c.Repositories.Product, c.Repositories.Brand),
 	}
 }
 
 // initControllers initializes all controller instances
 func (c *Container) initControllers() {
 	c.Controllers = &Controllers{
-		User:         controllers.NewUserController(c.Services.User, c.Validator),
-		Brand:        controllers.NewBrandController(c.Services.Brand, c.Validator),
-		Product:      controllers.NewProductController(c.Services.Product, c.Validator),
-		ShoppingCart: controllers.NewShoppingCartController(c.Services.ShoppingCart, c.Validator),
-		Favorite:     controllers.NewFavoriteController(c.Services.Favorite, c.Validator),
-		Review:       controllers.NewReviewController(c.Services.Review, c.Validator),
-		Wardrobe:     controllers.NewWardrobeController(c.Services.Wardrobe, c.Validator),
-		AI:           controllers.NewAIController(c.Services.AI, c.Services.ScanHistory),
-		Dashboard:    controllers.NewDashboardController(c.DB, c.Services.User, c.Services.Brand),
-		OAuth:        controllers.NewOAuthController(c.Services.User, c.Services.Firebase),
-		ScanHistory:  controllers.NewScanHistoryController(c.Services.ScanHistory, c.Services.SupabaseStorage),
+		User:        controllers.NewUserController(c.Services.User, c.Validator),
+		Brand:       controllers.NewBrandController(c.Services.Brand, c.Validator),
+		Product:     controllers.NewProductController(c.Services.Product, c.Validator),
+		SavedItems:  controllers.NewSavedItemsController(c.Services.SavedItems, c.Validator),
+		Favorite:    controllers.NewFavoriteController(c.Services.Favorite, c.Validator),
+		Review:      controllers.NewReviewController(c.Services.Review, c.Validator),
+		Wardrobe:    controllers.NewWardrobeController(c.Services.Wardrobe, c.Validator),
+		AI:          controllers.NewAIController(c.Services.AI, c.Services.ScanHistory),
+		Dashboard:   controllers.NewDashboardController(c.DB, c.Services.User, c.Services.Brand),
+		OAuth:       controllers.NewOAuthController(c.Services.User, c.Services.Firebase),
+		ScanHistory: controllers.NewScanHistoryController(c.Services.ScanHistory, c.Services.SupabaseStorage),
+		Tracking:    controllers.NewTrackingController(c.Services.Tracking, c.Services.Product, c.Repositories.Brand),
 	}
 }

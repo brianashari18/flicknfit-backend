@@ -11,7 +11,10 @@ import (
 // SeedProductConfigurationsAllCombinations
 // Setiap kombinasi warna + ukuran akan menghasilkan 1 ProductItem unik dengan stok sendiri
 func SeedProductConfigurationsAllCombinations(db *gorm.DB) error {
-	// Hapus semua ProductItem dan ProductConfiguration yang ada
+	// Hapus semua data yang ada dengan urutan yang benar (child first)
+	if err := db.Exec("DELETE FROM saved_items_items").Error; err != nil {
+		return err
+	}
 	if err := db.Exec("DELETE FROM product_configurations").Error; err != nil {
 		return err
 	}

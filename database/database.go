@@ -68,14 +68,15 @@ func Migrate(db *gorm.DB, logger *logrus.Logger) {
 		&models.ProductVariationOption{},
 		&models.ProductConfiguration{},
 		&models.Review{},
-		&models.ShoppingCart{},
-		&models.ShoppingCartItem{},
+		&models.SavedItems{},
+		&models.SavedItemsList{},
 		&models.Favorite{},
 		&models.UserWardrobe{},
 		&models.BodyScanHistory{},
 		&models.StyleRecommendation{},
 		&models.FaceScanHistory{},
 		&models.ColorToneRecommendation{},
+		&models.ProductClick{},
 	)
 	if err != nil {
 		logger.Error("Failed to migrate database schema!", slog.Any("error", err))

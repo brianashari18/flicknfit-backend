@@ -7,7 +7,7 @@ definitions:
     required:
     - product_item_id
     type: object
-  dtos.AddProductItemToCartRequestDTO:
+  dtos.AddProductItemToSavedItemsRequestDTO:
     properties:
       product_item_id:
         type: integer
@@ -420,22 +420,7 @@ definitions:
       user_id:
         type: integer
     type: object
-  dtos.ShoppingCartDTO:
-    properties:
-      created_at:
-        type: string
-      id:
-        type: integer
-      items:
-        items:
-          $ref: '#/definitions/dtos.ShoppingCartItemDTO'
-        type: array
-      updated_at:
-        type: string
-      user_id:
-        type: integer
-    type: object
-  dtos.ShoppingCartItemDTO:
+  dtos.SavedItemDTO:
     properties:
       id:
         type: integer
@@ -448,7 +433,22 @@ definitions:
       quantity:
         type: integer
     type: object
-  dtos.UpdateProductItemInCartRequestDTO:
+  dtos.SavedItemsDTO:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/dtos.SavedItemDTO'
+        type: array
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  dtos.UpdateProductItemInSavedItemsRequestDTO:
     properties:
       quantity:
         minimum: 1
@@ -1900,164 +1900,6 @@ paths:
       summary: Get brand by ID
       tags:
       - Brands
-  /cart:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all items in the authenticated user's shopping cart
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Shopping cart retrieved successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/utils.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/dtos.ShoppingCartDTO'
-              type: object
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/utils.Response'
-      security:
-      - BearerAuth: []
-      summary: Get user's shopping cart
-      tags:
-      - Shopping Cart
-    post:
-      consumes:
-      - application/json
-      description: Add a product item to the authenticated user's shopping cart
-      parameters:
-      - description: Product item to add
-        in: body
-        name: item
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.AddProductItemToCartRequestDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Product item added to cart successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/utils.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/dtos.ShoppingCartDTO'
-              type: object
-        "400":
-          description: Invalid request body or validation failed
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/utils.Response'
-      security:
-      - BearerAuth: []
-      summary: Add product to cart
-      tags:
-      - Shopping Cart
-  /cart/{itemId}:
-    delete:
-      consumes:
-      - application/json
-      description: Remove a product item from the shopping cart
-      parameters:
-      - description: Cart Item ID
-        in: path
-        name: itemId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Cart item removed successfully
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "400":
-          description: Invalid cart item ID
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "404":
-          description: Cart item not found
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/utils.Response'
-      security:
-      - BearerAuth: []
-      summary: Remove item from cart
-      tags:
-      - Shopping Cart
-    put:
-      consumes:
-      - application/json
-      description: Update quantity of a product item in the shopping cart
-      parameters:
-      - description: Cart Item ID
-        in: path
-        name: itemId
-        required: true
-        type: string
-      - description: Updated item data
-        in: body
-        name: item
-        required: true
-        schema:
-          $ref: '#/definitions/dtos.UpdateProductItemInCartRequestDTO'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Cart item updated successfully
-          schema:
-            allOf:
-            - $ref: '#/definitions/utils.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/dtos.ShoppingCartDTO'
-              type: object
-        "400":
-          description: Invalid request body or item ID
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "404":
-          description: Cart item not found
-          schema:
-            $ref: '#/definitions/utils.Response'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/utils.Response'
-      security:
-      - BearerAuth: []
-      summary: Update cart item
-      tags:
-      - Shopping Cart
   /favorites:
     get:
       consumes:
@@ -2677,6 +2519,192 @@ paths:
       summary: Get product reviews
       tags:
       - Reviews
+  /savedItems:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all items in the authenticated user's saved items
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: saved items retrieved successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.SavedItemsDTO'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user's saved items
+      tags:
+      - Saved items
+    post:
+      consumes:
+      - application/json
+      description: Add a product item to the authenticated user's saved items
+      parameters:
+      - description: Product item to add
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AddProductItemToSavedItemsRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product item added to savedItems successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.SavedItemsDTO'
+              type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Add product to savedItems
+      tags:
+      - Saved items
+  /savedItems/{itemId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a product item from the saved items
+      parameters:
+      - description: savedItems Item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: savedItems item removed successfully
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Invalid savedItems item ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: savedItems item not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Remove item from savedItems
+      tags:
+      - Saved items
+    put:
+      consumes:
+      - application/json
+      description: Update quantity of a product item in the saved items
+      parameters:
+      - description: savedItems Item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      - description: Updated item data
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UpdateProductItemInSavedItemsRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: savedItems item updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.SavedItemsDTO'
+              type: object
+        "400":
+          description: Invalid request body or item ID
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: savedItems item not found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update savedItems item
+      tags:
+      - Saved items
+  /track/click/product/{id}:
+    get:
+      description: Records a click event for analytics and redirects user to brand
+        store (WhatsApp/Instagram/Tokopedia/etc)
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/html
+      responses:
+        "302":
+          description: Redirect to brand store
+        "404":
+          description: Product not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Track product click and redirect
+      tags:
+      - Tracking
   /users/edit-profile:
     patch:
       consumes:
