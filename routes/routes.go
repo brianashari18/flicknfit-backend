@@ -49,6 +49,9 @@ func setupAPIRoutes(app *fiber.App, container *container.Container) {
 	// Setup AI prediction routes
 	setupAIRoutes(api, container)
 
+	// Setup scan history routes
+	setupScanHistoryRoutes(api, container)
+
 	// Setup OAuth routes
 	setupOAuthRoutes(api, container)
 
@@ -180,6 +183,24 @@ func setupAIRoutes(api fiber.Router, c *container.Container) {
 	predictionRoutes.Post("/skin-color-tone", c.Controllers.AI.PredictSkinColorTone)
 	predictionRoutes.Post("/woman-body-scan", c.Controllers.AI.PredictWomanBodyScan)
 	predictionRoutes.Post("/men-body-scan", c.Controllers.AI.PredictMenBodyScan)
+}
+
+// setupScanHistoryRoutes configures all scan history-related routes
+func setupScanHistoryRoutes(api fiber.Router, c *container.Container) {
+	// All scan history routes require authentication
+	historyRoutes := api.Group("/history")
+	historyRoutes.Use(middlewares.AuthMiddleware())
+
+	// Face scan history
+	historyRoutes.Get("/face", c.Controllers.ScanHistory.GetFaceScanHistories)
+	historyRoutes.Delete("/face/:id", c.Controllers.ScanHistory.DeleteFaceScanHistory)
+
+	// Body scan history
+	historyRoutes.Get("/body", c.Controllers.ScanHistory.GetBodyScanHistories)
+	historyRoutes.Delete("/body/:id", c.Controllers.ScanHistory.DeleteBodyScanHistory)
+
+	// Decrypt and serve scan image
+	historyRoutes.Get("/image", c.Controllers.ScanHistory.GetScanImage)
 }
 
 // setupOAuthRoutes sets up OAuth authentication routes

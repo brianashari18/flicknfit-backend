@@ -18,16 +18,18 @@ type AIController interface {
 
 // aiController is the implementation of AIController.
 type aiController struct {
-	aiService services.AIService
+	aiService          services.AIService
+	scanHistoryService services.ScanHistoryService
 }
 
 // NewAIController creates and returns a new instance of AIController.
-func NewAIController(aiService services.AIService) AIController {
+func NewAIController(aiService services.AIService, scanHistoryService services.ScanHistoryService) AIController {
 	if aiService == nil {
 		panic("aiService cannot be nil")
 	}
 	return &aiController{
-		aiService: aiService,
+		aiService:          aiService,
+		scanHistoryService: scanHistoryService,
 	}
 }
 
@@ -121,6 +123,24 @@ func (ctrl *aiController) PredictSkinColorTone(c *fiber.Ctx) error {
 	}
 
 	log.Printf("DEBUG: Success - Result: %+v", result)
+
+	// Auto-save to history if user is authenticated and scanHistoryService is available
+	if ctrl.scanHistoryService != nil {
+		if userID, ok := c.Locals("userID").(uint64); ok && userID > 0 {
+			// Reopen file for upload (src was consumed by PredictSkinColorTone)
+			srcForUpload, err := file.Open()
+			if err == nil {
+				defer srcForUpload.Close()
+				if err := ctrl.scanHistoryService.SaveFaceScanHistory(userID, srcForUpload, file.Filename, result); err != nil {
+					log.Printf("WARNING: Failed to save face scan history: %v", err)
+					// Don't fail the request, just log the warning
+				} else {
+					log.Printf("DEBUG: Face scan history saved for user %d", userID)
+				}
+			}
+		}
+	}
+
 	return utils.SendResponse(c, http.StatusOK, "Skin color tone predicted successfully", result)
 }
 
@@ -162,6 +182,23 @@ func (ctrl *aiController) PredictWomanBodyScan(c *fiber.Ctx) error {
 		return utils.SendResponse(c, http.StatusInternalServerError, "Failed to scan woman body: "+err.Error(), nil)
 	}
 
+	// Auto-save to history if user is authenticated and scanHistoryService is available
+	if ctrl.scanHistoryService != nil {
+		if userID, ok := c.Locals("userID").(uint64); ok && userID > 0 {
+			// Reopen file for upload
+			srcForUpload, err := file.Open()
+			if err == nil {
+				defer srcForUpload.Close()
+				if err := ctrl.scanHistoryService.SaveBodyScanHistory(userID, srcForUpload, file.Filename, "woman", result); err != nil {
+					log.Printf("WARNING: Failed to save body scan history: %v", err)
+					// Don't fail the request, just log the warning
+				} else {
+					log.Printf("DEBUG: Woman body scan history saved for user %d", userID)
+				}
+			}
+		}
+	}
+
 	return utils.SendResponse(c, http.StatusOK, "Body measurements predicted successfully", result)
 }
 
@@ -201,6 +238,23 @@ func (ctrl *aiController) PredictMenBodyScan(c *fiber.Ctx) error {
 	result, err := ctrl.aiService.PredictMenBodyScan(src, file.Filename)
 	if err != nil {
 		return utils.SendResponse(c, http.StatusInternalServerError, "Failed to scan body measurements: "+err.Error(), nil)
+	}
+
+	// Auto-save to history if user is authenticated and scanHistoryService is available
+	if ctrl.scanHistoryService != nil {
+		if userID, ok := c.Locals("userID").(uint64); ok && userID > 0 {
+			// Reopen file for upload
+			srcForUpload, err := file.Open()
+			if err == nil {
+				defer srcForUpload.Close()
+				if err := ctrl.scanHistoryService.SaveBodyScanHistory(userID, srcForUpload, file.Filename, "man", result); err != nil {
+					log.Printf("WARNING: Failed to save body scan history: %v", err)
+					// Don't fail the request, just log the warning
+				} else {
+					log.Printf("DEBUG: Men body scan history saved for user %d", userID)
+				}
+			}
+		}
 	}
 
 	return utils.SendResponse(c, http.StatusOK, "Body measurements predicted successfully", result)

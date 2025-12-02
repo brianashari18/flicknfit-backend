@@ -332,6 +332,8 @@ github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
+github.com/supabase-community/storage-go v0.8.1 h1:EwD0vr+ADBIjBWH8G69AxWuvdFhifv64cfE/sjRky6I=
+github.com/supabase-community/storage-go v0.8.1/go.mod h1:oBKcJf5rcUXy3Uj9eS5wR6mvpwbmvkjOtAA+4tGcdvQ=
 github.com/swaggo/fiber-swagger v1.1.0 h1:3yeJeStLYtUvj9zZg0/COwEESIxPBKM+OohOxB0tJ68=
 github.com/swaggo/fiber-swagger v1.1.0/go.mod h1:DaSh3M3So+l/lrdpnAHllOOmTsKZT4flCYjz+jbUIfo=
 github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2 h1:+iNTcqQJy0OZ5jk6a5NLib47eqXK8uYcPX+O4+cBpEM=

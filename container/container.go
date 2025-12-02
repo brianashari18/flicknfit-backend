@@ -23,26 +23,30 @@ type Container struct {
 
 // Repositories holds all repository instances
 type Repositories struct {
-	User         repositories.UserRepository
-	Brand        repositories.BrandRepository
-	Product      repositories.ProductRepository
-	ShoppingCart repositories.ShoppingCartRepository
-	Favorite     repositories.FavoriteRepository
-	Review       repositories.ReviewRepository
-	Wardrobe     repositories.WardrobeRepository
+	User            repositories.UserRepository
+	Brand           repositories.BrandRepository
+	Product         repositories.ProductRepository
+	ShoppingCart    repositories.ShoppingCartRepository
+	Favorite        repositories.FavoriteRepository
+	Review          repositories.ReviewRepository
+	Wardrobe        repositories.WardrobeRepository
+	FaceScanHistory repositories.FaceScanHistoryRepository
+	BodyScanHistory repositories.BodyScanHistoryRepository
 }
 
 // Services holds all service instances
 type Services struct {
-	User         services.UserService
-	Brand        services.BrandService
-	Product      services.ProductService
-	ShoppingCart services.ShoppingCartService
-	Favorite     services.FavoriteService
-	Review       services.ReviewService
-	Wardrobe     services.WardrobeService
-	AI           services.AIService
-	Firebase     *services.FirebaseService
+	User            services.UserService
+	Brand           services.BrandService
+	Product         services.ProductService
+	ShoppingCart    services.ShoppingCartService
+	Favorite        services.FavoriteService
+	Review          services.ReviewService
+	Wardrobe        services.WardrobeService
+	AI              services.AIService
+	Firebase        *services.FirebaseService
+	ScanHistory     services.ScanHistoryService
+	SupabaseStorage services.SupabaseStorageService
 }
 
 // Controllers holds all controller instances
@@ -57,6 +61,7 @@ type Controllers struct {
 	AI           controllers.AIController
 	Dashboard    controllers.DashboardController
 	OAuth        *controllers.OAuthController
+	ScanHistory  controllers.ScanHistoryController
 }
 
 // NewContainer creates and initializes a new container with all dependencies
@@ -83,13 +88,15 @@ func NewContainer(db *gorm.DB, cfg *config.Config) (*Container, error) {
 // initRepositories initializes all repository instances
 func (c *Container) initRepositories() {
 	c.Repositories = &Repositories{
-		User:         repositories.NewUserRepository(c.DB),
-		Brand:        repositories.NewBrandRepository(c.DB),
-		Product:      repositories.NewProductRepository(c.DB),
-		ShoppingCart: repositories.NewShoppingCartRepository(c.DB),
-		Favorite:     repositories.NewFavoriteRepository(c.DB),
-		Review:       repositories.NewReviewRepository(c.DB),
-		Wardrobe:     repositories.NewWardrobeRepository(c.DB),
+		User:            repositories.NewUserRepository(c.DB),
+		Brand:           repositories.NewBrandRepository(c.DB),
+		Product:         repositories.NewProductRepository(c.DB),
+		ShoppingCart:    repositories.NewShoppingCartRepository(c.DB),
+		Favorite:        repositories.NewFavoriteRepository(c.DB),
+		Review:          repositories.NewReviewRepository(c.DB),
+		Wardrobe:        repositories.NewWardrobeRepository(c.DB),
+		FaceScanHistory: repositories.NewFaceScanHistoryRepository(c.DB),
+		BodyScanHistory: repositories.NewBodyScanHistoryRepository(c.DB),
 	}
 }
 
@@ -102,16 +109,27 @@ func (c *Container) initServices() {
 		// Continue without Firebase - it's optional
 	}
 
+	// Initialize Supabase Storage service
+	var supabaseStorageService services.SupabaseStorageService
+	if c.Config.SupabaseURL != "" && c.Config.SupabaseKey != "" {
+		supabaseStorageService = services.NewSupabaseStorageService(c.Config)
+		utils.GetLogger().Info("Supabase storage service initialized")
+	} else {
+		utils.GetLogger().Warn("Supabase storage service not initialized - credentials missing")
+	}
+
 	c.Services = &Services{
-		User:         services.NewUserService(c.Repositories.User, c.Config),
-		Brand:        services.NewBrandService(c.Repositories.Brand),
-		Product:      services.NewProductService(c.Repositories.Product),
-		ShoppingCart: services.NewShoppingCartService(c.Repositories.ShoppingCart, c.Repositories.Product),
-		Favorite:     services.NewFavoriteService(c.Repositories.Favorite, c.Repositories.Product),
-		Review:       services.NewReviewService(c.Repositories.Review, c.Repositories.Product),
-		Wardrobe:     services.NewWardrobeService(c.Repositories.Wardrobe),
-		AI:           services.NewAIService(c.Config),
-		Firebase:     firebaseService,
+		User:            services.NewUserService(c.Repositories.User, c.Config),
+		Brand:           services.NewBrandService(c.Repositories.Brand),
+		Product:         services.NewProductService(c.Repositories.Product),
+		ShoppingCart:    services.NewShoppingCartService(c.Repositories.ShoppingCart, c.Repositories.Product),
+		Favorite:        services.NewFavoriteService(c.Repositories.Favorite, c.Repositories.Product),
+		Review:          services.NewReviewService(c.Repositories.Review, c.Repositories.Product),
+		Wardrobe:        services.NewWardrobeService(c.Repositories.Wardrobe),
+		AI:              services.NewAIService(c.Config),
+		Firebase:        firebaseService,
+		SupabaseStorage: supabaseStorageService,
+		ScanHistory:     services.NewScanHistoryService(c.Repositories.FaceScanHistory, c.Repositories.BodyScanHistory, supabaseStorageService),
 	}
 }
 
@@ -125,8 +143,9 @@ func (c *Container) initControllers() {
 		Favorite:     controllers.NewFavoriteController(c.Services.Favorite, c.Validator),
 		Review:       controllers.NewReviewController(c.Services.Review, c.Validator),
 		Wardrobe:     controllers.NewWardrobeController(c.Services.Wardrobe, c.Validator),
-		AI:           controllers.NewAIController(c.Services.AI),
+		AI:           controllers.NewAIController(c.Services.AI, c.Services.ScanHistory),
 		Dashboard:    controllers.NewDashboardController(c.DB, c.Services.User, c.Services.Brand),
 		OAuth:        controllers.NewOAuthController(c.Services.User, c.Services.Firebase),
+		ScanHistory:  controllers.NewScanHistoryController(c.Services.ScanHistory, c.Services.SupabaseStorage),
 	}
 }

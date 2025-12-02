@@ -33,6 +33,11 @@ type Config struct {
 	GeminiModel            string
 	TelkomLLMAPIKey        string
 	TelkomModel            string
+	TelkomLLMUrl           string
+	SupabaseURL            string
+	SupabaseKey            string
+	SupabaseBucket         string
+	EncryptionKey          string
 }
 
 // LoadConfig reads the configuration from environment variables.
@@ -65,6 +70,11 @@ func LoadConfig() (*Config, error) {
 		GeminiModel:            os.Getenv("GEMINI_MODEL"),
 		TelkomLLMAPIKey:        os.Getenv("TELKOM_LLM_API_KEY"),
 		TelkomModel:            os.Getenv("TELKOM_MODEL"),
+		TelkomLLMUrl:           os.Getenv("TELKOM_LLM_URL"),
+		SupabaseURL:            os.Getenv("SUPABASE_URL"),
+		SupabaseKey:            os.Getenv("SUPABASE_KEY"),
+		SupabaseBucket:         os.Getenv("SUPABASE_BUCKET"),
+		EncryptionKey:          os.Getenv("ENCRYPTION_KEY"),
 	}
 
 	// Simple validation to ensure critical variables are set.

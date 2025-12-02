@@ -63,9 +63,9 @@ func NewAIService(cfg *config.Config) AIService {
 	if cfg.TelkomLLMAPIKey != "" {
 		model := cfg.TelkomModel
 		if model == "" {
-			model = "Qwen2.5-Coder-32B-Instruct" // Default Telkom model
+			model = "telkom-ai" // Default Telkom model
 		}
-		providers = append(providers, NewTelkomProvider(cfg.TelkomLLMAPIKey, model))
+		providers = append(providers, NewTelkomLLMProvider(cfg.TelkomLLMUrl, cfg.TelkomLLMAPIKey, model))
 		log.Printf("[AIService] Telkom provider initialized with model: %s", model)
 	}
 

@@ -15,7 +15,7 @@
         },
         "version": "1.0"
     },
-    "host": "192.168.2.41:8000",
+    "host": "localhost:8000",
     "basePath": "/api/v1",
     "paths": {
         "/admin/brands": {
@@ -2299,6 +2299,290 @@
                 }
             }
         },
+        "/history/body": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all body scan histories for the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Scan History"
+                ],
+                "summary": "Get body scan histories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dtos.BodyScanHistoryListDTO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/history/body/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a specific body scan history by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Scan History"
+                ],
+                "summary": "Delete body scan history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Body Scan History ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - not owner",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "History not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/history/face": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all face scan histories for the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Scan History"
+                ],
+                "summary": "Get face scan histories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dtos.FaceScanHistoryListDTO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/history/face/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a specific face scan history by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Scan History"
+                ],
+                "summary": "Delete face scan history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Face Scan History ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - not owner",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "History not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/history/image": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Download and decrypt a scan image by file path",
+                "produces": [
+                    "image/jpeg"
+                ],
+                "tags": [
+                    "Scan History"
+                ],
+                "summary": "Get scan image",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "File path in storage",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Image file",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing file path",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "File not found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/products": {
             "get": {
                 "description": "Retrieve all available products for public viewing",
@@ -3484,6 +3768,53 @@
                 }
             }
         },
+        "dtos.BodyScanHistoryDTO": {
+            "type": "object",
+            "properties": {
+                "body_type": {
+                    "type": "string"
+                },
+                "confidence": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image_url": {
+                    "description": "Signed URL from Supabase",
+                    "type": "string"
+                },
+                "scan_name": {
+                    "type": "string"
+                },
+                "style_recommendations": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dtos.BodyScanHistoryListDTO": {
+            "type": "object",
+            "properties": {
+                "histories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.BodyScanHistoryDTO"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "dtos.BrandCreateRequestDTO": {
             "type": "object",
             "required": [
@@ -3602,6 +3933,50 @@
                 },
                 "image_url": {
                     "type": "string"
+                }
+            }
+        },
+        "dtos.FaceScanHistoryDTO": {
+            "type": "object",
+            "properties": {
+                "color_recommendations": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "confidence": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image_url": {
+                    "description": "Signed URL from Supabase",
+                    "type": "string"
+                },
+                "scan_name": {
+                    "type": "string"
+                },
+                "skin_tone": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.FaceScanHistoryListDTO": {
+            "type": "object",
+            "properties": {
+                "histories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.FaceScanHistoryDTO"
+                    }
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },
@@ -3754,6 +4129,9 @@
                 },
                 "sku": {
                     "type": "string"
+                },
+                "sold": {
+                    "type": "integer"
                 },
                 "stock": {
                     "type": "integer"
