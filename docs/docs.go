@@ -2331,7 +2331,7 @@ const docTemplate = `{
         },
         "/products": {
             "get": {
-                "description": "Retrieve all available products for public viewing",
+                "description": "Retrieve all available products for public viewing with optional filters",
                 "consumes": [
                     "application/json"
                 ],
@@ -2342,6 +2342,39 @@ const docTemplate = `{
                     "Products"
                 ],
                 "summary": "Get all products",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Filter by brand ID",
+                        "name": "brand",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by category name",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Minimum price",
+                        "name": "min_price",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Maximum price",
+                        "name": "max_price",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Minimum rating",
+                        "name": "min_rating",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Products retrieved successfully",
@@ -4228,13 +4261,28 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "max_price": {
+                    "description": "Highest price from variants",
+                    "type": "integer"
+                },
+                "min_price": {
+                    "description": "Lowest price from variants",
+                    "type": "integer"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "preview_image_url": {
+                    "description": "First product item photo",
                     "type": "string"
                 },
                 "rating": {
                     "type": "number"
                 },
                 "reviewer": {
+                    "type": "integer"
+                },
+                "sold": {
                     "type": "integer"
                 },
                 "updated_at": {
@@ -4805,7 +4853,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8000",
+	Host:             "192.168.2.42:8000",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "FlickNFit API",

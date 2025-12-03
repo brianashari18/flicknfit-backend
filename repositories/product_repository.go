@@ -102,6 +102,9 @@ func (r *productRepository) GetAllProductsPublic() ([]*models.Product, error) {
 		Preload("Brand").
 		Preload("ProductCategories").
 		Preload("ProductStyles").
+		Preload("ProductItems", func(db *gorm.DB) *gorm.DB {
+			return db.Order("price ASC") // Order by price for preview image
+		}).
 		Preload("ProductItems.Configurations.ProductVariationOption.ProductVariation").
 		Preload("Reviews").
 		Find(&products).Error; err != nil {
@@ -173,12 +176,15 @@ func (r *productRepository) GetAllProductsPublicWithFilter(filter *dtos.ProductF
 	tx := r.DB.Model(&models.Product{})
 
 	tx.
+		Preload("ProductItems", func(db *gorm.DB) *gorm.DB {
+			return db.Order("price ASC") // Order by price for preview image
+		}).
 		Preload("ProductItems.Configurations.ProductVariationOption").
 		Preload("Reviews")
 
-	// Filter berdasarkan nama produk
+	// Filter berdasarkan nama produk (case-insensitive for MySQL)
 	if filter.Name != "" {
-		tx = tx.Where("name ILIKE ?", "%"+filter.Name+"%")
+		tx = tx.Where("LOWER(name) LIKE LOWER(?)", "%"+filter.Name+"%")
 	}
 
 	// Filter berdasarkan rentang harga
@@ -192,16 +198,19 @@ func (r *productRepository) GetAllProductsPublicWithFilter(filter *dtos.ProductF
 			Where("product_items.price <= ?", filter.MaxPrice)
 	}
 
-	// Filter berdasarkan brand
-	if filter.BrandName != "" {
+	// Filter berdasarkan brand ID (prioritas)
+	if filter.BrandID > 0 {
+		tx = tx.Where("brand_id = ?", filter.BrandID)
+	} else if filter.BrandName != "" {
+		// Fallback: filter by brand name (case-insensitive for MySQL)
 		tx = tx.Joins("JOIN brands ON products.brand_id = brands.id").
-			Where("brands.name ILIKE ?", "%"+filter.BrandName+"%")
+			Where("LOWER(brands.name) LIKE LOWER(?)", "%"+filter.BrandName+"%")
 	}
 
-	// Filter berdasarkan kategori
+	// Filter berdasarkan kategori (case-insensitive for MySQL)
 	if filter.Category != "" {
 		tx = tx.Joins("JOIN product_categories ON products.id = product_categories.product_id").
-			Where("product_categories.category ILIKE ?", "%"+filter.Category+"%")
+			Where("LOWER(product_categories.category) LIKE LOWER(?)", "%"+filter.Category+"%")
 	}
 
 	// Filter berdasarkan rating minimum

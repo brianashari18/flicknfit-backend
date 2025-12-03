@@ -365,11 +365,22 @@ definitions:
         type: number
       id:
         type: integer
+      max_price:
+        description: Highest price from variants
+        type: integer
+      min_price:
+        description: Lowest price from variants
+        type: integer
       name:
+        type: string
+      preview_image_url:
+        description: First product item photo
         type: string
       rating:
         type: number
       reviewer:
+        type: integer
+      sold:
         type: integer
       updated_at:
         type: string
@@ -744,7 +755,7 @@ definitions:
       status:
         type: string
     type: object
-host: localhost:8000
+host: 192.168.2.42:8000
 info:
   contact:
     email: support@flicknfit.com
@@ -2194,7 +2205,30 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve all available products for public viewing
+      description: Retrieve all available products for public viewing with optional
+        filters
+      parameters:
+      - description: Filter by brand ID
+        format: int64
+        in: query
+        name: brand
+        type: integer
+      - description: Filter by category name
+        in: query
+        name: category
+        type: string
+      - description: Minimum price
+        in: query
+        name: min_price
+        type: number
+      - description: Maximum price
+        in: query
+        name: max_price
+        type: number
+      - description: Minimum rating
+        in: query
+        name: min_rating
+        type: number
       produces:
       - application/json
       responses:

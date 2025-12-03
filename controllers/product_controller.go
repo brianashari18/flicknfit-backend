@@ -229,14 +229,35 @@ func (ctrl *productController) GetProductPublicByID(c *fiber.Ctx) error {
 
 // GetAllProductsPublic handles fetching all products for public users.
 // @Summary Get all products
-// @Description Retrieve all available products for public viewing
+// @Description Retrieve all available products for public viewing with optional filters
 // @Tags Products
 // @Accept json
 // @Produce json
+// @Param brand query uint64 false "Filter by brand ID"
+// @Param category query string false "Filter by category name"
+// @Param min_price query number false "Minimum price"
+// @Param max_price query number false "Maximum price"
+// @Param min_rating query number false "Minimum rating"
 // @Success 200 {object} utils.Response{data=[]dtos.ProductResponseDTO} "Products retrieved successfully"
 // @Failure 500 {object} utils.Response "Internal server error"
 // @Router /products [get]
 func (ctrl *productController) GetAllProductsPublic(c *fiber.Ctx) error {
+	// Check if any filter query params exist
+	var filterParams dtos.ProductFilterRequestDTO
+	if err := c.QueryParser(&filterParams); err == nil {
+		// If filters are provided, use filtered query
+		if filterParams.BrandID > 0 || filterParams.Category != "" ||
+			filterParams.MinPrice > 0 || filterParams.MaxPrice > 0 || filterParams.MinRating > 0 {
+			products, err := ctrl.productService.GetAllProductsPublicWithFilter(&filterParams)
+			if err != nil {
+				return utils.SendResponse(c, http.StatusInternalServerError, "Failed to retrieve products", nil)
+			}
+			response := dtos.ToProductResponseDTOs(products)
+			return utils.SendResponse(c, http.StatusOK, "Products retrieved successfully", response)
+		}
+	}
+
+	// No filters, get all products
 	products, err := ctrl.productService.GetAllProductsPublic()
 	if err != nil {
 		return utils.SendResponse(c, http.StatusInternalServerError, "Failed to retrieve products", nil)

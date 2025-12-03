@@ -7,20 +7,24 @@ import (
 
 // ProductResponseDTO digunakan untuk menampilkan data produk publik.
 type ProductResponseDTO struct {
-	ID          uint64    `json:"id"`
-	BrandID     uint64    `json:"brand_id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Discount    float64   `json:"discount"`
-	Rating      float64   `json:"rating"`
-	Reviewer    int       `json:"reviewer"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID              uint64    `json:"id"`
+	BrandID         uint64    `json:"brand_id"`
+	Name            string    `json:"name"`
+	Description     string    `json:"description"`
+	Discount        float64   `json:"discount"`
+	Rating          float64   `json:"rating"`
+	Reviewer        int       `json:"reviewer"`
+	Sold            int       `json:"sold"`
+	PreviewImageURL string    `json:"preview_image_url"` // First product item photo
+	MinPrice        int       `json:"min_price"`         // Lowest price from variants
+	MaxPrice        int       `json:"max_price"`         // Highest price from variants
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 // ToProductResponseDTO mengonversi model Product menjadi ProductResponseDTO.
 func ToProductResponseDTO(product *models.Product) ProductResponseDTO {
-	return ProductResponseDTO{
+	dto := ProductResponseDTO{
 		ID:          product.ID,
 		BrandID:     product.BrandID,
 		Name:        product.Name,
@@ -28,9 +32,31 @@ func ToProductResponseDTO(product *models.Product) ProductResponseDTO {
 		Discount:    product.Discount,
 		Rating:      product.Rating,
 		Reviewer:    product.Reviewer,
+		Sold:        product.Sold,
 		CreatedAt:   product.CreatedAt,
 		UpdatedAt:   product.UpdatedAt,
 	}
+
+	// Calculate min/max price and get preview image from ProductItems
+	if len(product.ProductItems) > 0 {
+		minPrice := product.ProductItems[0].Price
+		maxPrice := product.ProductItems[0].Price
+		dto.PreviewImageURL = product.ProductItems[0].PhotoURL
+
+		for _, item := range product.ProductItems {
+			if item.Price < minPrice {
+				minPrice = item.Price
+			}
+			if item.Price > maxPrice {
+				maxPrice = item.Price
+			}
+		}
+
+		dto.MinPrice = minPrice
+		dto.MaxPrice = maxPrice
+	}
+
+	return dto
 }
 
 // ToProductResponseDTOs mengonversi slice model Product menjadi slice ProductResponseDTO.
@@ -359,7 +385,8 @@ type ProductFilterRequestDTO struct {
 	Name      string  `query:"name"`
 	MinPrice  float64 `query:"min_price"`
 	MaxPrice  float64 `query:"max_price"`
-	BrandName string  `query:"brand_name"`
+	BrandID   uint64  `query:"brand"`      // Filter by brand ID
+	BrandName string  `query:"brand_name"` // Filter by brand name (alternative)
 	Category  string  `query:"category"`
 	MinRating float64 `query:"min_rating"`
 }

@@ -30,7 +30,7 @@ import (
 // @license.name MIT
 // @license.url https://github.com/flicknfit/backend/blob/main/LICENSE
 
-// @host localhost:8000
+// @host 192.168.2.42:8000
 // @BasePath /api/v1
 
 // @securityDefinitions.apikey BearerAuth
