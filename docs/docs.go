@@ -4741,6 +4741,10 @@ const docTemplate = `{
                 "phone_number": {
                     "type": "string"
                 },
+                "profile_picture_url": {
+                    "description": "From Google OAuth or manual upload",
+                    "type": "string"
+                },
                 "region": {
                     "type": "string"
                 },

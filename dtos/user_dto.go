@@ -93,30 +93,32 @@ type UserAdminUpdateRequestDTO struct {
 }
 
 type UserResponseDTO struct {
-	ID          uint64     `json:"id"`
-	Email       string     `json:"email"`
-	Username    string     `json:"username"`
-	PhoneNumber string     `json:"phone_number"`
-	Gender      string     `json:"gender"`
-	Birthday    *time.Time `json:"birthday,omitempty"`
-	Region      string     `json:"region"`
-	Role        string     `json:"role"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
+	ID                uint64     `json:"id"`
+	Email             string     `json:"email"`
+	Username          string     `json:"username"`
+	PhoneNumber       string     `json:"phone_number"`
+	Gender            string     `json:"gender"`
+	Birthday          *time.Time `json:"birthday,omitempty"`
+	Region            string     `json:"region"`
+	Role              string     `json:"role"`
+	ProfilePictureURL string     `json:"profile_picture_url"` // From Google OAuth or manual upload
+	CreatedAt         time.Time  `json:"created_at"`
+	UpdatedAt         time.Time  `json:"updated_at"`
 }
 
 func ToUserResponseDTO(u *models.User) UserResponseDTO {
 	return UserResponseDTO{
-		ID:          u.ID,
-		Email:       u.Email,
-		Username:    u.Username,
-		PhoneNumber: u.PhoneNumber,
-		Gender:      string(u.Gender),
-		Birthday:    u.Birthday,
-		Region:      u.Region,
-		Role:        string(u.Role),
-		CreatedAt:   u.CreatedAt,
-		UpdatedAt:   u.UpdatedAt,
+		ID:                u.ID,
+		Email:             u.Email,
+		Username:          u.Username,
+		PhoneNumber:       u.PhoneNumber,
+		Gender:            string(u.Gender),
+		Birthday:          u.Birthday,
+		Region:            u.Region,
+		Role:              string(u.Role),
+		ProfilePictureURL: u.ProfilePictureURL,
+		CreatedAt:         u.CreatedAt,
+		UpdatedAt:         u.UpdatedAt,
 	}
 }
 
