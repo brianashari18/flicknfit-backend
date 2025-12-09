@@ -140,6 +140,12 @@ func (s *aiService) PredictSkinColorTone(file multipart.File, filename string) (
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
+	// Validate that AI actually returned a prediction
+	if result.SkinTone == "" {
+		log.Printf("ERROR: AI API returned empty skin_tone")
+		return nil, fmt.Errorf("AI failed to predict skin color tone from the uploaded image")
+	}
+
 	log.Printf("DEBUG: AI Service success - Result: %+v", result)
 
 	// Enrich with LLM color recommendations if available
@@ -182,6 +188,11 @@ func (s *aiService) PredictWomanBodyScan(file multipart.File, filename string) (
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
+	// Validate that AI actually returned a prediction
+	if result.PredictedClass == "" {
+		return nil, fmt.Errorf("AI failed to predict body type from the uploaded image")
+	}
+
 	// Enrich with LLM style recommendations if available
 	if s.llmChain != nil && result.PredictedClass != "" {
 		log.Printf("DEBUG: Getting style recommendations for body type: %s", result.PredictedClass)
@@ -220,6 +231,11 @@ func (s *aiService) PredictMenBodyScan(file multipart.File, filename string) (*d
 	var result dtos.MenBodyScanPredictionResponseDTO
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	// Validate that AI actually returned a prediction
+	if result.PredictedClass == "" {
+		return nil, fmt.Errorf("AI failed to predict body type from the uploaded image")
 	}
 
 	// Enrich with LLM style recommendations if available
